@@ -31,7 +31,7 @@ const UploadResult: React.FC = () => {
   const [formKey, setFormKey] = React.useState<number>(0);
 
   const {
-    register,
+    // register,
     control,
     handleSubmit,
     formState: { errors },
@@ -42,17 +42,18 @@ const UploadResult: React.FC = () => {
     const formData = new FormData();
     formData.append("semester", data.semester);
     formData.append("year", data.year);
+    formData.append("Session", data.session);
     formData.append("file", data.result);
 
     try {
-      // console.log("Form Data Submitted:", data);
-      const res = await fetch("/api/upload-results", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        console.error("Failed to upload results");
-      }
+      console.log("Form Data Submitted:", data);
+      // const res = await fetch("/api/upload-results", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      // if (!res.ok) {
+      //   console.error("Failed to upload results");
+      // }
     } catch (error) {
       console.error("Error uploading results:", error);
       toast.error("Failed to upload results. Please try again.");
@@ -98,14 +99,54 @@ const UploadResult: React.FC = () => {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="year">Year</Label>
-                <Input
-                  id="year"
-                  type="text"
-                  {...register("year")}
-                  placeholder="e.g, 2025"
+                <Controller
+                  name="year"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Year</SelectLabel>
+                          <SelectItem value="1">1st</SelectItem>
+                          <SelectItem value="2">2nd</SelectItem>
+                          <SelectItem value="3">3rd</SelectItem>
+                          <SelectItem value="4">4th</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 {errors.year && (
                   <p className="text-red-500">{errors.year.message}</p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="session">Session</Label>
+                <Controller
+                  name="session"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Session" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Session</SelectLabel>
+                          <SelectItem value="2023-2024">2023-2024</SelectItem>
+                          <SelectItem value="2024-2025">2024-2025</SelectItem>
+                          <SelectItem value="2025-2026">2025-2026</SelectItem>
+                          <SelectItem value="2026-2027">2026-2027</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.session && (
+                  <p className="text-red-500">{errors.session.message}</p>
                 )}
               </div>
               <div className="grid gap-2">
