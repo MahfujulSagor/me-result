@@ -24,6 +24,7 @@ import { uploadSchema } from "@/lib/resultUploadSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
+import { sessions } from "@/lib/sessions";
 
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
@@ -46,14 +47,14 @@ const UploadResult: React.FC = () => {
     formData.append("file", data.result);
 
     try {
-      console.log("Form Data Submitted:", data);
-      // const res = await fetch("/api/upload-results", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-      // if (!res.ok) {
-      //   console.error("Failed to upload results");
-      // }
+      // console.log("Form Data Submitted:", data);
+      const res = await fetch("/api/upload-results", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        console.error("Failed to upload results");
+      }
     } catch (error) {
       console.error("Error uploading results:", error);
       toast.error("Failed to upload results. Please try again.");
@@ -73,30 +74,6 @@ const UploadResult: React.FC = () => {
         <form key={formKey} onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="mb-6">
             <div className="flex flex-col gap-6">
-              <div className="grid gap-2 w-full">
-                <Label htmlFor="semester">Semester</Label>
-                <Controller
-                  name="semester"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Semester" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Semester</SelectLabel>
-                          <SelectItem value="1">1st</SelectItem>
-                          <SelectItem value="2">2nd</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.semester && (
-                  <p className="text-red-500">{errors.semester.message}</p>
-                )}
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="year">Year</Label>
                 <Controller
@@ -123,6 +100,30 @@ const UploadResult: React.FC = () => {
                   <p className="text-red-500">{errors.year.message}</p>
                 )}
               </div>
+              <div className="grid gap-2 w-full">
+                <Label htmlFor="semester">Semester</Label>
+                <Controller
+                  name="semester"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Semester" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Semester</SelectLabel>
+                          <SelectItem value="1">1st</SelectItem>
+                          <SelectItem value="2">2nd</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.semester && (
+                  <p className="text-red-500">{errors.semester.message}</p>
+                )}
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="session">Session</Label>
                 <Controller
@@ -136,10 +137,14 @@ const UploadResult: React.FC = () => {
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Session</SelectLabel>
-                          <SelectItem value="2023-2024">2023-2024</SelectItem>
-                          <SelectItem value="2024-2025">2024-2025</SelectItem>
-                          <SelectItem value="2025-2026">2025-2026</SelectItem>
-                          <SelectItem value="2026-2027">2026-2027</SelectItem>
+                          {sessions.map((session) => (
+                            <SelectItem
+                              key={session.value}
+                              value={session.value}
+                            >
+                              {session.label}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
