@@ -48,7 +48,7 @@ const UploadResult: React.FC = () => {
 
     try {
       // console.log("Form Data Submitted:", data);
-      const res = await fetch("/api/v1/upload-results", {
+      const res = await fetch("/api/v1/upload-result", {
         method: "POST",
         body: formData,
       });
