@@ -9,12 +9,10 @@ export const uploadSchema = z.object({
     .refine(
       (file) =>
         [
-          "image/jpeg",
-          "image/png",
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ].includes(file.type),
       {
-        message: "Only .jpg, .png or .xlsx files are allowed",
+        message: ".xlsx files are allowed",
       }
     ),
 });

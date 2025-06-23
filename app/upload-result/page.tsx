@@ -164,7 +164,7 @@ const UploadResult: React.FC = () => {
                     <Input
                       id="result"
                       type="file"
-                      accept=".xlsx, .png, .jpg, .jpeg"
+                      accept=".xlsx"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         field.onChange(file);
