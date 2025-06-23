@@ -32,7 +32,6 @@ const UploadResult: React.FC = () => {
   const [formKey, setFormKey] = React.useState<number>(0);
 
   const {
-    // register,
     control,
     handleSubmit,
     formState: { errors },
@@ -47,7 +46,6 @@ const UploadResult: React.FC = () => {
     formData.append("file", data.result);
 
     try {
-      // console.log("Form Data Submitted:", data);
       const res = await fetch("/api/v1/upload-result", {
         method: "POST",
         body: formData,
@@ -182,7 +180,7 @@ const UploadResult: React.FC = () => {
           </CardContent>
           <CardFooter className="flex-col gap-2">
             <Button type="submit" className="w-full">
-              Submit
+              Upload
             </Button>
             <Button variant="outline" className="w-full">
               Cancel

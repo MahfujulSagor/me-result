@@ -1,11 +1,10 @@
-// import { db } from "@/lib/appwrite-server";
-// import { ID } from "appwrite";
+import { db } from "@/lib/appwrite-server";
+import { ID, Query } from "appwrite";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
-// const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
-// const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
-// const STUDENTS_COLLECTION_ID = process.env.APPWRITE_STUDENTS_COLLECTION_ID!;
+const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
+const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
   const formData = await req.formData();
@@ -36,6 +35,9 @@ export const POST = async (req: NextRequest) => {
       const studentIdKey = headers.find((k) =>
         k.toLowerCase().includes("student id")
       );
+      const studentNameKey = headers.find((k) =>
+        k.toLowerCase().includes("name")
+      );
       const cgpaKey = headers.find((k) => k.toLowerCase().includes("gpa"));
       const totalCreditKey = headers.find((k) =>
         k.toLowerCase().includes("credit earned")
@@ -45,21 +47,46 @@ export const POST = async (req: NextRequest) => {
       );
       const gradeKey = headers.find((k) => k.toLowerCase().includes("result"));
 
-      if (!studentIdKey || !cgpaKey || !totalCreditKey) continue;
+      if (!studentIdKey || !studentNameKey || !cgpaKey || !totalCreditKey) {
+        continue;
+      }
 
       const studentId = row[studentIdKey];
+      const studentName = row[studentNameKey];
       const cgpa = row[cgpaKey];
       const totalCredit = row[totalCreditKey];
       const rawBacklogs = backlogsKey ? row[backlogsKey] : "";
       const grade = gradeKey ? row[gradeKey] : "";
 
-      if (!studentId || !cgpa || !totalCredit) continue;
+      if (!studentId || !cgpa || !totalCredit || !studentName) {
+        continue;
+      }
+
+      //? Sanitation: Check for duplicate
+      const existing = await db.listDocuments(
+        DATABASE_ID,
+        RESULTS_COLLECTION_ID,
+        [
+          Query.equal("student_id", studentId),
+          Query.equal("semester", semester),
+          Query.equal("year", year),
+          Query.equal("session", session),
+        ]
+      );
+
+      if (existing.total > 0) {
+        console.log(`Duplicate found for ${studentId}. Skipping...`);
+        continue;
+      }
 
       let backlogs = "";
+      //? Backlog handling
+      let has_backlogs: boolean = false;
 
       if (typeof rawBacklogs === "string" && rawBacklogs.includes("(")) {
         const matches = rawBacklogs.match(/([\d.]+)\(([^)]+)\)/g);
         if (matches) {
+          has_backlogs = true;
           const parsed = matches.map((entry) => {
             const [, credit, course] = entry.match(/([\d.]+)\(([^)]+)\)/)!;
             return { course, credit_lost: parseFloat(credit) };
@@ -68,45 +95,25 @@ export const POST = async (req: NextRequest) => {
         }
       }
 
-      // await db.createDocument(DATABASE_ID, RESULTS_COLLECTION_ID, ID.unique(), {
-      //   student_id: studentId,
-      //   cgpa: cgpa.toString(),
-      //   total_credit: totalCredit.toString(),
-      //   backlogs: backlogs || "",
-      //   semester,
-      //   year,
-      //   session,
-      //   grade,
-      // });
+      const result = await db.createDocument(
+        DATABASE_ID,
+        RESULTS_COLLECTION_ID,
+        ID.unique(),
+        {
+          student_id: studentId,
+          name: studentName,
+          cgpa: cgpa.toString(),
+          total_credit: totalCredit.toString(),
+          has_backlogs,
+          backlogs: backlogs || "",
+          semester,
+          year,
+          session,
+          grade,
+        }
+      );
 
-      const result = {
-        student_id: studentId,
-        cgpa: cgpa.toString(),
-        total_credit: totalCredit.toString(),
-        backlogs: backlogs || "",
-        semester,
-        year,
-        session,
-        grade,
-      };
-
-      // const result = await db.createDocument(
-      //   DATABASE_ID,
-      //   RESULTS_COLLECTION_ID,
-      //   ID.unique(),
-      //   {
-      //     student_id: studentId,
-      //     cgpa: cgpa.toString(),
-      //     total_credit: totalCredit.toString(),
-      //     backlogs: backlogs || "",
-      //     semester,
-      //     year,
-      //     session,
-      //     grade,
-      //   }
-      // );
-
-      console.log("Uploaded result for student:", studentId, result);
+      console.log("Uploaded result for student:", result);
     }
 
     return NextResponse.json(
