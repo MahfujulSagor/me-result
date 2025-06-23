@@ -27,3 +27,9 @@ jobs:
 
       - name: Build the project
         run: npm run build
+        env:
+          NEXT_PUBLIC_APPWRITE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_APPWRITE_PROJECT_ID }}
+          NEXT_PUBLIC_APPWRITE_ENDPOINT: ${{ secrets.NEXT_PUBLIC_APPWRITE_ENDPOINT }}
+          APPWRITE_DATABASE_ID: ${{ secrets.APPWRITE_DATABASE_ID }}
+          APPWRITE_RESULTS_COLLECTION_ID: ${{ secrets.APPWRITE_RESULTS_COLLECTION_ID }}
+          APPWRITE_STUDENTS_COLLECTION_ID: ${{ secrets.APPWRITE_STUDENTS_COLLECTION_ID }}
