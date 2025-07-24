@@ -25,6 +25,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
 import { sessions } from "@/lib/sessions";
+import Image from "next/image";
+import ME from "@/public/me-logo.png";
 
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
@@ -65,9 +67,18 @@ const UploadResult: React.FC = () => {
   };
   return (
     <div className="w-full min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
         <CardHeader>
-          <CardTitle>Upload Results</CardTitle>
+          <CardTitle className="flex items-center justify-center">
+            <Image
+              src={ME}
+              alt="ME_logo"
+              width={65}
+              className="object-cover"
+              objectFit="cover"
+            />
+          </CardTitle>
+          <CardTitle className="text-center mt-2">Upload Results</CardTitle>
         </CardHeader>
         <form key={formKey} onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="mb-6">
@@ -155,7 +166,7 @@ const UploadResult: React.FC = () => {
               <div className="grid gap-2">
                 <Label htmlFor="result">
                   Result{" "}
-                  <span className="text-teal-400">(e.g, example.xlsx)</span>
+                  <span className="text-blue-400">(e.g, example.xlsx)</span>
                 </Label>
                 <Controller
                   name="result"
@@ -179,7 +190,10 @@ const UploadResult: React.FC = () => {
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600"
+            >
               Upload
             </Button>
             <Button variant="outline" className="w-full">
