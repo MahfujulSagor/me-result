@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { userLoginSchema } from "@/lib/userLoginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import React from "react";
@@ -18,29 +17,37 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import ME from "@/public/me-logo.png";
+import { userSchema } from "@/lib/userSchema";
+import { useAppwrite } from "@/context/appwrite-context";
 
-type loginSchema = z.infer<typeof userLoginSchema>;
+type signUpSchema = z.infer<typeof userSchema>;
 
-const Login: React.FC = () => {
+const SignUp: React.FC = () => {
+  const { signUp } = useAppwrite();
   const {
     handleSubmit,
     formState: { errors },
     register,
     reset,
-  } = useForm<loginSchema>({ resolver: zodResolver(userLoginSchema) });
+  } = useForm<signUpSchema>({ resolver: zodResolver(userSchema) });
 
-  const onSubmit = async (data: loginSchema): Promise<void> => {
+  const onSubmit = async (data: signUpSchema): Promise<void> => {
     const formData = new FormData();
 
-    formData.append("username", data.username);
+    formData.append("username", data.username.toUpperCase());
+    formData.append("email", data.email);
     formData.append("password", data.password);
 
     try {
-      console.log(data);
+      await signUp({
+        email: data.email,
+        username: data.username,
+        password: data.password,
+      });
     } catch (error) {
-      console.error("Error during login:", error);
+      console.error("Error during sign up:", error);
       toast.error(
-        "Failed to login. Please check your credentials and try again."
+        "Failed to sign up. Please check your credentials and try again."
       );
     } finally {
       reset();
@@ -61,10 +68,10 @@ const Login: React.FC = () => {
             />
           </CardTitle>
           <CardTitle className="text-center mt-2">
-            Login to your account
+            Create a new account
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials below to login to your account
+            Enter your credentials below to create a new account
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,6 +89,19 @@ const Login: React.FC = () => {
                   />
                   {errors.username && (
                     <p className="text-red-500">{errors.username.message}</p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email"
+                    {...register("email")}
+                    required
+                  />
+                  {errors.email && (
+                    <p className="text-red-500">{errors.email.message}</p>
                   )}
                 </div>
                 <div className="grid gap-2">
@@ -107,7 +127,7 @@ const Login: React.FC = () => {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600"
             >
-              Login
+              Sign Up
             </Button>
           </CardFooter>
         </form>
@@ -116,4 +136,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default SignUp;

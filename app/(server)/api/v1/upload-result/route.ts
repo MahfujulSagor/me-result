@@ -1,4 +1,4 @@
-import { db } from "@/lib/appwrite-server";
+import { db } from "@/appwrite/appwrite-server";
 import { ID, Query } from "appwrite";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
