@@ -3,6 +3,7 @@ import { useAppwrite } from "@/context/appwrite-context";
 import { Models } from "appwrite";
 import React from "react";
 
+
 export default function Home() {
   const { getSession } = useAppwrite();
   const [session, setSession] = React.useState<Models.Session | null>(null);
@@ -22,6 +23,7 @@ export default function Home() {
 
   return (
     <div className="">
+      hello world
       <h1>{session ? `Welcome back, ${session.userId}!` : "Please log in."}</h1>
     </div>
   );
