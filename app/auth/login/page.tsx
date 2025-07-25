@@ -18,10 +18,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import ME from "@/public/me-logo.png";
+import { useAppwrite } from "@/context/appwrite-context";
 
 type loginSchema = z.infer<typeof userLoginSchema>;
 
 const Login: React.FC = () => {
+  const { login } = useAppwrite();
   const {
     handleSubmit,
     formState: { errors },
@@ -30,13 +32,9 @@ const Login: React.FC = () => {
   } = useForm<loginSchema>({ resolver: zodResolver(userLoginSchema) });
 
   const onSubmit = async (data: loginSchema): Promise<void> => {
-    const formData = new FormData();
-
-    formData.append("username", data.username);
-    formData.append("password", data.password);
-
     try {
-      console.log(data);
+      await login(data.username, data.password);
+      toast.success("Login successful!");
     } catch (error) {
       console.error("Error during login:", error);
       toast.error(

@@ -32,12 +32,6 @@ const SignUp: React.FC = () => {
   } = useForm<signUpSchema>({ resolver: zodResolver(userSchema) });
 
   const onSubmit = async (data: signUpSchema): Promise<void> => {
-    const formData = new FormData();
-
-    formData.append("username", data.username.toUpperCase());
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-
     try {
       await signUp({
         email: data.email,

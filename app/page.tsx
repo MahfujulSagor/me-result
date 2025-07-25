@@ -1,25 +1,13 @@
 "use client";
 import { useAppwrite } from "@/context/appwrite-context";
-import { Models } from "appwrite";
 import React from "react";
 
-
 export default function Home() {
-  const { getSession } = useAppwrite();
-  const [session, setSession] = React.useState<Models.Session | null>(null);
+  const { session, loading } = useAppwrite();
 
-  React.useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const session = await getSession();
-        setSession(session);
-      } catch (error) {
-        console.error("Error fetching session:", error);
-      }
-    };
-
-    fetchSession();
-  }, [getSession]);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="">

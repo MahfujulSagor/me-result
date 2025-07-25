@@ -48,20 +48,20 @@ const UploadResult: React.FC = () => {
     formData.append("file", data.result);
 
     try {
-      const res = await fetch("/api/v1/upload-result", {
+      const res = await fetch("/api/v1/publish-result", {
         method: "POST",
         body: formData,
       });
       if (!res.ok) {
-        console.error("Failed to upload results");
+        console.error("Failed to publish results");
       }
     } catch (error) {
-      console.error("Error uploading results:", error);
-      toast.error("Failed to upload results. Please try again.");
+      console.error("Error publishing results:", error);
+      toast.error("Failed to publish results. Please try again.");
       return;
     } finally {
       reset();
-      toast.success("Results uploaded successfully!");
+      toast.success("Results published successfully!");
       setFormKey((prev) => prev + 1); //? Force re-render to reset the form
     }
   };

@@ -1,27 +1,31 @@
-import { db } from "@/appwrite/appwrite-server";
+import { account, db } from "@/appwrite/appwrite-server";
 import { generateAcademicSession } from "@/lib/generateAcademicSessionWithId";
-import { studentIdCheck } from "@/lib/studentIdCheck";
+import { userSchema } from "@/lib/userSchema";
 import { NextRequest, NextResponse } from "next/server";
-import { ID } from "node-appwrite";
+import { ID } from "appwrite";
 
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
 const STUDENTS_COLLECTION_ID = process.env.APPWRITE_STUDENTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
-  const { email, username } = await req.json();
+  const { email, username, password } = await req.json();
 
-  if (!email || !username) {
+  if (!email || !username || !password) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 }
     );
   }
 
-  const result = studentIdCheck.safeParse(username);
+  const validationResult = userSchema.safeParse({
+    username: username,
+    email: email,
+    password: password,
+  });
 
-  if (!result.success) {
+  if (!validationResult.success) {
     return NextResponse.json(
-      { error: result.error.errors[0].message }, //? returns "Must be a valid ME department ID"
+      { error: validationResult.error.errors[0].message },
       { status: 400 }
     );
   }
@@ -29,23 +33,46 @@ export const POST = async (req: NextRequest) => {
   const session = generateAcademicSession(username);
 
   try {
+    const studentAccount = await account.create(
+      ID.unique(),
+      email.trim().toLowerCase(),
+      password,
+      username.trim().toUpperCase()
+    );
+
+    if (!studentAccount) {
+      return NextResponse.json(
+        { error: "Failed to create user account" },
+        { status: 500 }
+      );
+    }
+
+    console.log("User account created successfully:", studentAccount);
+
     const student = await db.createDocument(
       DATABASE_ID,
       STUDENTS_COLLECTION_ID,
       ID.unique(),
       {
-        student_email: email,
-        student_id: username,
+        student_email: email.trim().toLowerCase(),
+        student_id: username.trim().toUpperCase(),
         academic_session: session,
       }
     );
 
-    const { student_email, student_id, academic_session } = student;
+    if (!student) {
+      return NextResponse.json(
+        { error: "Failed to create student document" },
+        { status: 500 }
+      );
+    }
+
+    console.log("Student document created successfully:", student);
+
+    const { academic_session } = student;
 
     return NextResponse.json(
       {
-        student_email,
-        student_id,
         academic_session,
       },
       { status: 201 }
