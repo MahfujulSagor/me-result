@@ -78,7 +78,7 @@ const UploadResult: React.FC = () => {
               objectFit="cover"
             />
           </CardTitle>
-          <CardTitle className="text-center mt-2">Upload Results</CardTitle>
+          <CardTitle className="text-center mt-2">Publish Results</CardTitle>
         </CardHeader>
         <form key={formKey} onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="mb-6">
@@ -194,7 +194,7 @@ const UploadResult: React.FC = () => {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600"
             >
-              Upload
+              Publish
             </Button>
             <Button variant="outline" className="w-full">
               Cancel

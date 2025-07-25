@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -11,14 +10,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { studentSchema } from "@/lib/studentSchema";
+import { userLoginSchema } from "@/lib/userLoginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
+import ME from "@/public/me-logo.png";
 
-type studentLoginSchema = z.infer<typeof studentSchema>;
+type loginSchema = z.infer<typeof userLoginSchema>;
 
 const Login: React.FC = () => {
   const {
@@ -26,16 +27,16 @@ const Login: React.FC = () => {
     formState: { errors },
     register,
     reset,
-  } = useForm<studentLoginSchema>({ resolver: zodResolver(studentSchema) });
+  } = useForm<loginSchema>({ resolver: zodResolver(userLoginSchema) });
 
-  const onSubmit = async (data: studentLoginSchema): Promise<void> => {
+  const onSubmit = async (data: loginSchema): Promise<void> => {
     const formData = new FormData();
 
-    formData.append("studentID", data.studentID);
-    formData.append("email", data.email);
-    formData.append("studentID", data.password);
+    formData.append("username", data.username);
+    formData.append("password", data.password);
 
     try {
+      console.log(data);
     } catch (error) {
       console.error("Error during login:", error);
       toast.error(
@@ -48,55 +49,44 @@ const Login: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen flex justify-center items-center">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+          <CardTitle className="flex items-center justify-center">
+            <Image
+              src={ME}
+              alt="ME_logo"
+              width={65}
+              className="object-cover"
+              objectFit="cover"
+            />
+          </CardTitle>
+          <CardTitle className="text-center mt-2">
+            Login to your account
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your credentials below to login to your account
           </CardDescription>
-          <CardAction>
-            <Button variant="link">Sign Up</Button>
-          </CardAction>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent>
             <div>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="studentID">Student ID</Label>
+                  <Label htmlFor="ID">Username</Label>
                   <Input
-                    id="studentID"
+                    id="username"
                     type="text"
-                    placeholder="Student ID"
-                    {...register("studentID")}
+                    placeholder="username"
+                    {...register("username")}
                     required
                   />
-                  {errors.studentID && (
-                    <p className="text-red-500">{errors.studentID.message}</p>
-                  )}
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="me@example.com"
-                    {...register("email")}
-                    required
-                  />
-                  {errors.email && (
-                    <p className="text-red-500">{errors.email.message}</p>
+                  {errors.username && (
+                    <p className="text-red-500">{errors.username.message}</p>
                   )}
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
                   </div>
                   <Input
                     id="password"
@@ -112,7 +102,10 @@ const Login: React.FC = () => {
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2 mt-6">
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full bg-blue-500 hover:bg-blue-600"
+            >
               Login
             </Button>
           </CardFooter>

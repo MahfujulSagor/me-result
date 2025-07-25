@@ -1,9 +1,9 @@
 import z from "zod";
 
-export const studentSchema = z
+export const userSchema = z
   .object({
-    studentID: z.string().regex(/^ME\d{5,}$/, {
-      message: "Must be a valid ME student ID",
+    username: z.string().regex(/^ME\d{5,}$/, {
+      message: "Must be a valid ME department ID",
     }),
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Must be at least 8 characters long"),
@@ -18,19 +18,18 @@ export const studentSchema = z
       ctx.addIssue({
         path: ["email"],
         code: z.ZodIssueCode.custom,
-        message: "Must be a valid ME student email",
+        message: "Must be a valid ME department email",
       });
     }
 
-    // ?Match email prefix with studentID
     const emailPrefix = email.split("@")[0].toUpperCase();
-    const id = data.studentID.toUpperCase();
+    const id = data.username.toUpperCase();
 
     if (emailPrefix !== id) {
       ctx.addIssue({
-        path: ["studentID"],
+        path: ["username"],
         code: z.ZodIssueCode.custom,
-        message: "Student ID must match the email prefix",
+        message: "username must match the email prefix",
       });
     }
   });
