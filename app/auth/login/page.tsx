@@ -35,7 +35,7 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: loginSchema): Promise<void> => {
     try {
-      await login(data.username.toUpperCase(), data.password);
+      await login(data.username.trim().toLocaleUpperCase(), data.password);
       toast.success("Login successful!");
     } catch (error) {
       console.error("Error during login:", error);
@@ -66,7 +66,7 @@ const Login: React.FC = () => {
             <div>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="ID">Username</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
                     id="username"
                     type="text"

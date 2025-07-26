@@ -2,7 +2,7 @@ import z from "zod";
 
 export const userSchema = z
   .object({
-    username: z.string().regex(/^ME\d{5,}$/, {
+    username: z.string().regex(/^ME\d{5,}$/i, {
       message: "Must be a valid ME department ID",
     }),
     email: z.string().email("Invalid email address"),

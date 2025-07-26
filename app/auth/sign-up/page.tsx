@@ -36,8 +36,8 @@ const SignUp: React.FC = () => {
   const onSubmit = async (data: signUpSchema): Promise<void> => {
     try {
       await signUp({
-        email: data.email.trim().toLowerCase(),
-        username: data.username.toUpperCase(),
+        email: data.email.trim().toLocaleLowerCase(),
+        username: data.username.trim().toLocaleUpperCase(),
         password: data.password,
       });
     } catch (error) {
