@@ -19,11 +19,13 @@ import { toast } from "sonner";
 import z from "zod";
 import ME from "@/public/me-logo.png";
 import { useAppwrite } from "@/context/appwrite-context";
+import { Eye, EyeOff } from "lucide-react";
 
 type loginSchema = z.infer<typeof userLoginSchema>;
 
 const Login: React.FC = () => {
   const { login } = useAppwrite();
+  const [showPassword, setShowPassword] = React.useState<boolean>(false);
   const {
     handleSubmit,
     formState: { errors },
@@ -50,12 +52,7 @@ const Login: React.FC = () => {
       <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-center">
-            <Image
-              src={ME}
-              alt="ME_logo"
-              width={65}
-              className="object-cover"
-            />
+            <Image src={ME} alt="ME_logo" width={65} className="object-cover" />
           </CardTitle>
           <CardTitle className="text-center mt-2">
             Login to your account
@@ -86,13 +83,28 @@ const Login: React.FC = () => {
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="********"
-                    {...register("password")}
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="********"
+                      className="pr-10"
+                      {...register("password")}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="text-red-500">{errors.password.message}</p>
                   )}
