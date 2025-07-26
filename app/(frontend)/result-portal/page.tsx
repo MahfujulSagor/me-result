@@ -87,6 +87,7 @@ const ResultPortal = () => {
 
   return (
     <div className="">
+      {/* Navbar */}
       <nav className="py-4 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div>
@@ -97,35 +98,12 @@ const ResultPortal = () => {
           </h1>
         </div>
 
-        {/* <div className="flex items-center gap-4 tracking-tight">
-          <div className="text-end">
-            {session ? (
-              <>
-                <p className="font-medium">Student ID: {student_id}</p>
-                <p className="font-medium">Session: {academic_session}</p>
-              </>
-            ) : (
-              <>
-                {loading ? (
-                  <p className="font-medium">Loading...</p>
-                ) : (
-                  <p className="font-medium">Please log in.</p>
-                )}
-              </>
-            )}
-            <Button
-              onClick={logout}
-              className="bg-blue-500 hover:bg-blue-600 mt-2"
-            >
-              Logout
-            </Button>
-          </div>
-        </div> */}
         <NavUser
           user={{ student_id: student_id, academic_session: academic_session }}
         />
       </nav>
 
+      {/* Result Portal Content */}
       {result ? (
         <div className="w-full flex items-center justify-center">
           <Card className="w-full max-w-5xl shadow-2xl shadow-blue-200">
@@ -168,7 +146,7 @@ const ResultPortal = () => {
                   </Card>
 
                   {/* CG Card */}
-                  <Card className="w-full p-4 shadow-lg border rounded-xl">
+                  <Card className="w-full p-4 bg-cyan-200/50 shadow-lg border rounded-xl">
                     <CardHeader>
                       <CardTitle className="text-xl">
                         Academic Summary
@@ -180,7 +158,7 @@ const ResultPortal = () => {
                         <p>
                           <strong>CGPA:</strong>
                         </p>
-                        <Badge className="text-md px-3 py-1 bg-green-100 text-green-800 border border-green-300">
+                        <Badge className="text-md px-3 py-1 bg-teal-200 text-balck border border-teal-400">
                           {result.cgpa}
                         </Badge>
                       </div>
@@ -205,7 +183,7 @@ const ResultPortal = () => {
 
                   {/* Backlogs Card */}
                   {result.has_backlogs && (
-                    <Card className="w-full col-span-2 p-4 shadow-lg border rounded-xl">
+                    <Card className="w-full col-span-2 p-4 bg-rose-200/50 shadow-lg border rounded-xl">
                       <CardHeader>
                         <CardTitle className="text-xl">Backlogs</CardTitle>
                         <CardDescription>Failed Courses</CardDescription>
