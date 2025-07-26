@@ -6,6 +6,7 @@ import ME from "@/public/me-logo.png";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -26,15 +27,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useAppwrite } from "@/context/appwrite-context";
+import { Badge } from "@/components/ui/badge";
 
 type ResultFormValues = z.infer<typeof resultFormSchema>;
 
 const ResultPortal = () => {
-  const [backlog, setBacklog] = React.useState(false);
-  const [result, setResult] = React.useState(1);
+  const [backlogs, setBacklogs] = React.useState([]);
+  const [result, setResult] = React.useState(null);
 
   const { session, loading, academic_session, student_id, logout } =
     useAppwrite();
+
   const {
     control,
     handleSubmit,
@@ -48,8 +51,8 @@ const ResultPortal = () => {
     const query = new URLSearchParams({
       year: data.year,
       semester: data.semester,
-      session: "2023-2024",
-      student_id: "ME24034",
+      session: academic_session,
+      student_id: student_id,
     }).toString();
 
     try {
@@ -68,6 +71,10 @@ const ResultPortal = () => {
       const result = await response.json();
       console.log("Result fetched successfully:", result);
       setResult(result);
+      if (result.has_backlogs) {
+        const parsed = JSON.parse(result.backlogs);
+        setBacklogs(parsed);
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       return;
@@ -116,25 +123,110 @@ const ResultPortal = () => {
       </nav>
 
       {result ? (
-        <div className="w-full flex items-center justify-center translate-y-1/2">
-          <Card className="w-full max-w-6xl shadow-2xl shadow-blue-200">
+        <div className="w-full flex items-center justify-center">
+          <Card className="w-full max-w-5xl shadow-2xl shadow-blue-200">
             <CardHeader>
-              <CardTitle className="text-center text-2xl font-medium mt-2">1st Year 2nd Semester Final Result</CardTitle>
+              <CardTitle className="text-center text-2xl font-medium mt-2">
+                1st Year 2nd Semester Final Result
+              </CardTitle>
             </CardHeader>
-            <CardContent className="">
-              <div>
-                <p>Name: </p>
-                <p>Student ID: </p>
-                <p>Year: </p>
-                <p>Semester: </p>
-                <p>Total Credit: </p>
-              </div>
-              {
-                backlog && (
-                  <div>Backlog</div>
-                )
-              }
-            </CardContent>
+            <div>
+              <CardContent className="flex items-center justify-center">
+                <div className="w-4xl grid grid-cols-2 gap-2">
+                  {/* Info Card */}
+                  <Card className="Info-card bg-blue-200/50 shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Student Profile</CardTitle>
+                      <CardDescription>Personal Information</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col gap-1">
+                        <p>
+                          <strong>Name:</strong> {result.name}
+                        </p>
+                        <p>
+                          <strong>Student ID:</strong> {result.student_id}
+                        </p>
+                        <p>
+                          <strong>Year:</strong> {result.year}
+                        </p>
+                        <p>
+                          <strong>Semester:</strong> {result.semester}
+                        </p>
+                        <p>
+                          <strong>Session:</strong> {result.academic_session}
+                        </p>
+                        <p>
+                          <strong>Total Credit:</strong> {result.total_credit}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* CG Card */}
+                  <Card className="w-full p-4 shadow-lg border rounded-xl">
+                    <CardHeader>
+                      <CardTitle className="text-xl">
+                        Academic Summary
+                      </CardTitle>
+                      <CardDescription>Overall Performance</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-base">
+                      <div className="flex items-center justify-between">
+                        <p>
+                          <strong>CGPA:</strong>
+                        </p>
+                        <Badge className="text-md px-3 py-1 bg-green-100 text-green-800 border border-green-300">
+                          {result.cgpa}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p>
+                          <strong>Total Credits:</strong>
+                        </p>
+                        <Badge className="text-md px-3 py-1 bg-blue-100 text-blue-800 border border-blue-300">
+                          {result.total_credit}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p>
+                          <strong>Grade:</strong>
+                        </p>
+                        <Badge className="text-md px-3 py-1 bg-yellow-100 text-yellow-800 border border-yellow-300">
+                          {result.grade}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Backlogs Card */}
+                  {result.has_backlogs && (
+                    <Card className="w-full col-span-2 p-4 shadow-lg border rounded-xl">
+                      <CardHeader>
+                        <CardTitle className="text-xl">Backlogs</CardTitle>
+                        <CardDescription>Failed Courses</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {backlogs.map((item, index) => (
+                          <div
+                            key={index}
+                            className="p-3 border border-muted rounded-md bg-muted/50"
+                          >
+                            <p>
+                              <strong>Course:</strong> {item.course}
+                            </p>
+                            <p>
+                              <strong>Credit Lost:</strong> {item.credit_lost}
+                            </p>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                </div>
+              </CardContent>
+            </div>
           </Card>
         </div>
       ) : (
