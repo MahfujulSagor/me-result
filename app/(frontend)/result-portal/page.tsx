@@ -28,6 +28,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useAppwrite } from "@/context/appwrite-context";
 import { Badge } from "@/components/ui/badge";
+import { NavUser } from "@/components/nav-user";
 
 type ResultFormValues = z.infer<typeof resultFormSchema>;
 
@@ -96,7 +97,7 @@ const ResultPortal = () => {
           </h1>
         </div>
 
-        <div className="flex items-center gap-4 tracking-tight">
+        {/* <div className="flex items-center gap-4 tracking-tight">
           <div className="text-end">
             {session ? (
               <>
@@ -119,7 +120,10 @@ const ResultPortal = () => {
               Logout
             </Button>
           </div>
-        </div>
+        </div> */}
+        <NavUser
+          user={{ student_id: student_id, academic_session: academic_session }}
+        />
       </nav>
 
       {result ? (
@@ -223,9 +227,19 @@ const ResultPortal = () => {
                       </CardContent>
                     </Card>
                   )}
-
                 </div>
               </CardContent>
+              <CardFooter className="flex justify-center items-center mt-20">
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setResult(null);
+                    setBacklogs([]);
+                  }}
+                >
+                  Back to Portal
+                </Button>
+              </CardFooter>
             </div>
           </Card>
         </div>
