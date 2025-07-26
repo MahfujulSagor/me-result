@@ -75,7 +75,6 @@ const UploadResult: React.FC = () => {
               alt="ME_logo"
               width={65}
               className="object-cover"
-              objectFit="cover"
             />
           </CardTitle>
           <CardTitle className="text-center mt-2">Publish Results</CardTitle>

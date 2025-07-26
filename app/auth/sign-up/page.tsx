@@ -58,7 +58,6 @@ const SignUp: React.FC = () => {
               alt="ME_logo"
               width={65}
               className="object-cover"
-              objectFit="cover"
             />
           </CardTitle>
           <CardTitle className="text-center mt-2">
@@ -78,7 +77,7 @@ const SignUp: React.FC = () => {
                     id="username"
                     type="text"
                     className="uppercase"
-                    placeholder="username"
+                    placeholder="id"
                     {...register("username")}
                     required
                   />
