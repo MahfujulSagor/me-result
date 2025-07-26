@@ -36,8 +36,7 @@ const ResultPortal = () => {
   const [backlogs, setBacklogs] = React.useState([]);
   const [result, setResult] = React.useState(null);
 
-  const { session, loading, academic_session, student_id, logout } =
-    useAppwrite();
+  const { academic_session, student_id } = useAppwrite();
 
   const {
     control,

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
+import { useAppwrite } from "@/context/appwrite-context";
 
 export function NavUser({
   user,
@@ -23,6 +24,8 @@ export function NavUser({
     academic_session: string;
   };
 }) {
+  const { logout } = useAppwrite();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -69,7 +72,7 @@ export function NavUser({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem onClick={logout} variant="destructive">
           <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>

@@ -219,6 +219,9 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      //? Delete client side session in Appwrite
+      await account.deleteSession("current");
+
       setSession(null);
       setAcademicSession(null);
       setStudentId(null);

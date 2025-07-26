@@ -3,21 +3,26 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
 
-  //? Allow public and system paths
-  if (
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico"
-  ) {
-    return NextResponse.next();
-  }
+  const isAuthRoute = pathname.startsWith("/auth");
 
   const sessionToken = req.cookies.get("session_token")?.value;
 
+  //? Allow public and system paths
+  if (pathname.startsWith("/_next") || pathname === "/favicon.ico") {
+    return NextResponse.next();
+  }
+
   if (!sessionToken) {
-    console.warn("No session token found");
-    //? Redirect with error query to trigger toast on login page
+    if (
+      isAuthRoute ||
+      pathname.startsWith("/api/v1/session/create") ||
+      pathname.startsWith("/api/v1/session/delete") ||
+      pathname.startsWith("/api/v1/session/validate") ||
+      pathname.startsWith("/api/v1/create-user")
+    ) {
+      return NextResponse.next(); //? allow login/signup/api
+    }
+
     const loginUrl = new URL("/auth/login", origin);
     loginUrl.searchParams.set("error", "no-session");
     return NextResponse.redirect(loginUrl);
@@ -31,10 +36,16 @@ export async function middleware(req: NextRequest) {
       },
     });
 
-    if (validateRes.status === 200) {
+    const isValid = validateRes.status === 200;
+
+    if (isValid) {
+      // 🔒 Redirect authenticated users away from /auth/*
+      if (isAuthRoute) {
+        return NextResponse.redirect(new URL("/result-portal", origin));
+      }
+
       return NextResponse.next();
     } else {
-      //? Session invalid or expired — redirect with error to show toast
       const loginUrl = new URL("/auth/login", origin);
       loginUrl.searchParams.set("error", "session-expired");
       return NextResponse.redirect(loginUrl);
@@ -49,6 +60,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/auth/:path*",
     "/publish-result/:path*",
     "/result-portal/:path*",
     "/((?!auth|api|_next|favicon.ico).*)",

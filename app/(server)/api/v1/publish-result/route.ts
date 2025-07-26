@@ -8,6 +8,11 @@ const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
   const formData = await req.formData();
+  const session_token = req.cookies.get("session_token")?.value;
+
+  if (!session_token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const file = formData.get("file") as File;
   const semester = formData.get("semester") as string;

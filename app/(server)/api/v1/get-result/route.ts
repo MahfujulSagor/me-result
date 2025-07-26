@@ -7,6 +7,11 @@ const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
 export const GET = async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
+  const session_token = req.cookies.get("session_token")?.value;
+
+  if (!session_token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const semester = searchParams.get("semester") as string;
   const year = searchParams.get("year") as string;
