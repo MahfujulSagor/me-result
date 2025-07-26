@@ -35,16 +35,34 @@ export const useAppwrite = () => {
 const createSession = async (
   email: string,
   password: string
-): Promise<void> => {
+): Promise<boolean> => {
   if (!email || !password) {
     console.error("Missing credentials");
-    return;
+    return false;
   }
 
   try {
+    const res = await fetch("/api/v1/session/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      console.error("Failed to log in via server session route");
+      return false;
+    }
+
+    //? Create client side session in Appwrite
     await account.createEmailPasswordSession(email, password);
+
+    return true;
   } catch (error) {
-    console.error("Error creating session", error);
+    console.error("Server session error:", error);
+    return false;
   }
 };
 
@@ -74,9 +92,12 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
-
   React.useEffect(() => {
-    getSession(); //? fetch once on mount
+    getSession();
+
+    const handleFocus = () => getSession();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   const login = async (id: string, password: string): Promise<void> => {
@@ -89,7 +110,11 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     const email = generateEmailFromId(id);
 
     try {
-      await createSession(email, password);
+      const success = await createSession(email, password);
+      if (!success) {
+        console.error("Failed to create session");
+        return;
+      }
 
       const user = await account.get(); //? pulls preferences
 
@@ -148,6 +173,7 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
           username: username.trim().toUpperCase(),
@@ -162,7 +188,11 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
       const { academic_session, student_id } = await response.json();
 
-      await createSession(email, password);
+      const success = await createSession(email, password);
+      if (!success) {
+        console.error("Failed to create session after sign up");
+        return;
+      }
 
       setAcademicSession(academic_session);
       setStudentId(student_id);
@@ -179,7 +209,16 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      await account.deleteSession("current");
+      const res = await fetch("/api/v1/session/delete", {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("Failed to delete session");
+        return;
+      }
+
       setSession(null);
       setAcademicSession(null);
       setStudentId(null);
