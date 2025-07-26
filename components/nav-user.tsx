@@ -28,7 +28,7 @@ export function NavUser({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center min-w-56 min-h-12 gap-2 px-3 py-2 text-sm hover:bg-muted rounded-lg"
+          className="shadow-sm shadow-blue-200 border border-blue-200 flex items-center min-w-56 min-h-12 gap-2 px-3 py-2 text-sm hover:bg-muted rounded-lg"
         >
           <Avatar className="h-8 w-8 rounded-lg">
             <AvatarFallback className="rounded-lg">ME</AvatarFallback>
