@@ -34,8 +34,8 @@ const SignUp: React.FC = () => {
   const onSubmit = async (data: signUpSchema): Promise<void> => {
     try {
       await signUp({
-        email: data.email,
-        username: data.username,
+        email: data.email.trim().toLowerCase(),
+        username: data.username.toUpperCase(),
         password: data.password,
       });
     } catch (error) {
@@ -77,6 +77,7 @@ const SignUp: React.FC = () => {
                   <Input
                     id="username"
                     type="text"
+                    className="uppercase"
                     placeholder="username"
                     {...register("username")}
                     required
@@ -90,6 +91,7 @@ const SignUp: React.FC = () => {
                   <Input
                     id="email"
                     type="email"
+                    className="lowercase"
                     placeholder="email"
                     {...register("email")}
                     required

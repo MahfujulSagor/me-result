@@ -25,10 +25,13 @@ import { resultFormSchema } from "@/lib/resultFormSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useAppwrite } from "@/context/appwrite-context";
 
 type ResultFormValues = z.infer<typeof resultFormSchema>;
 
 const ResultPortal = () => {
+  const { session, loading, academic_session, student_id, logout } =
+    useAppwrite();
   const {
     control,
     handleSubmit,
@@ -39,11 +42,11 @@ const ResultPortal = () => {
   });
 
   const onSubmit = async (data: ResultFormValues): Promise<void> => {
-    const formData = new FormData();
-    formData.append("semester", data.semester);
-    formData.append("year", data.year);
-    formData.append("session", "2023-2024"); // Assuming session is static for now
-    formData.append("student_id", "ME24034"); // Assuming username is static for now
+    // const formData = new FormData();
+    // formData.append("semester", data.semester);
+    // formData.append("year", data.year);
+    // formData.append("session", "2023-2024"); // Assuming session is static for now
+    // formData.append("student_id", "ME24034"); // Assuming username is static for now
 
     const query = new URLSearchParams({
       year: data.year,
@@ -90,9 +93,26 @@ const ResultPortal = () => {
 
         <div className="flex items-center gap-4 tracking-tight">
           <div className="text-end">
-            <p className="font-medium">Student ID: ME-24034</p>
-            <p className="font-medium">Session: 2023-2024</p>
-            <Button className="bg-blue-500 hover:bg-blue-600 mt-2">
+            {/* <p className="font-medium">Student ID: ME-24034</p>
+            <p className="font-medium">Session: 2023-2024</p> */}
+            {session ? (
+              <>
+                <p className="font-medium">Student ID: {student_id}</p>
+                <p className="font-medium">Session: {academic_session}</p>
+              </>
+            ) : (
+              <>
+                {loading ? (
+                  <p className="font-medium">Loading...</p>
+                ) : (
+                  <p className="font-medium">Please log in.</p>
+                )}
+              </>
+            )}
+            <Button
+              onClick={logout}
+              className="bg-blue-500 hover:bg-blue-600 mt-2"
+            >
               Logout
             </Button>
           </div>

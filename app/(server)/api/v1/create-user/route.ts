@@ -1,5 +1,5 @@
 import { account, db } from "@/appwrite/appwrite-server";
-import { generateAcademicSession } from "@/lib/generateAcademicSessionWithId";
+import { generateAcademicSession } from "@/lib/generateAcademicSession";
 import { userSchema } from "@/lib/userSchema";
 import { NextRequest, NextResponse } from "next/server";
 import { ID } from "appwrite";
@@ -8,6 +8,7 @@ const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
 const STUDENTS_COLLECTION_ID = process.env.APPWRITE_STUDENTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
+  //? Username is expected to be in the format "ME24034" which is the student ID
   const { email, username, password } = await req.json();
 
   if (!email || !username || !password) {
@@ -69,11 +70,12 @@ export const POST = async (req: NextRequest) => {
 
     console.log("Student document created successfully:", student);
 
-    const { academic_session } = student;
+    const { academic_session, student_id } = student;
 
     return NextResponse.json(
       {
         academic_session,
+        student_id,
       },
       { status: 201 }
     );

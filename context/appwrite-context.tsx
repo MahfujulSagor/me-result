@@ -1,6 +1,8 @@
 "use client";
 
 import { account } from "@/appwrite/appwrite-client";
+import { generateAcademicSession } from "@/lib/generateAcademicSession";
+import { generateEmailFromId } from "@/lib/generateEmailFromId";
 import { userSchema } from "@/lib/userSchema";
 import { Models } from "appwrite";
 import { useRouter } from "next/navigation";
@@ -12,10 +14,11 @@ type AppwriteContextType = {
     username: string;
     password: string;
   }) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
+  login: (id: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   session: Models.Session | null;
   academic_session: string | null;
+  student_id: string | null;
   loading: boolean;
 };
 
@@ -32,15 +35,14 @@ export const useAppwrite = () => {
 const createSession = async (
   email: string,
   password: string
-): Promise<void | null> => {
+): Promise<void> => {
   if (!email || !password) {
     console.error("Missing credentials");
-    return null;
+    return;
   }
 
   try {
-    const session = await account.createEmailPasswordSession(email, password);
-    console.log("Created session", session);
+    await account.createEmailPasswordSession(email, password);
   } catch (error) {
     console.error("Error creating session", error);
   }
@@ -55,20 +57,19 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
   const [academic_session, setAcademicSession] = React.useState<string | null>(
     null
   );
+  const [student_id, setStudentId] = React.useState<string | null>(null);
 
-  const getSession = async (): Promise<Models.Session | null> => {
+  const getSession = async (): Promise<void> => {
     try {
       const session = await account.getSession("current");
       setSession(session);
 
       const user = await account.get(); //? pulls preferences
       setAcademicSession(user.prefs?.academic_session || null);
-
-      return session;
+      setStudentId(user.prefs?.student_id || null);
     } catch (error) {
       console.error("Error getting session", error);
       setSession(null);
-      return null;
     } finally {
       setLoading(false);
     }
@@ -78,15 +79,38 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     getSession(); //? fetch once on mount
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
-    if (!email || !password) {
+  const login = async (id: string, password: string): Promise<void> => {
+    if (!id || !password) {
       console.error("Missing credentials");
       return;
     }
 
+    //? Generate email from ID
+    const email = generateEmailFromId(id);
+
     try {
       await createSession(email, password);
+
+      const user = await account.get(); //? pulls preferences
+
+      if (user.prefs?.student_id && user.prefs?.academic_session) {
+        setStudentId(user.prefs?.student_id || null);
+        setAcademicSession(user.prefs?.academic_session || null);
+      } else {
+        setStudentId(id);
+
+        //? Generate academic session from ID
+        const generatedAcademicSession = generateAcademicSession(id);
+        setAcademicSession(generatedAcademicSession || null);
+
+        //? persist in Appwrite prefs
+        await account.updatePrefs({
+          student_id: id,
+          academic_session: generatedAcademicSession,
+        });
+      }
       await getSession(); //? refresh context
+
       router.push("/result-portal");
     } catch (error) {
       console.error("Error logging in. Please check your credentials.", error);
@@ -136,15 +160,16 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      const { academic_session } = await response.json();
+      const { academic_session, student_id } = await response.json();
 
       await createSession(email, password);
-      await getSession(); //? refresh context
 
       setAcademicSession(academic_session);
-
+      setStudentId(student_id);
       //? persist in Appwrite prefs
-      await account.updatePrefs({ academic_session });
+      await account.updatePrefs({ academic_session, student_id });
+
+      await getSession(); //? refresh context
     } catch (error) {
       console.error("Error creating account", error);
     } finally {
@@ -156,6 +181,10 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     try {
       await account.deleteSession("current");
       setSession(null);
+      setAcademicSession(null);
+      setStudentId(null);
+      setLoading(true); //? reset loading state
+
       router.push("/auth/login");
     } catch (error) {
       console.error("Error logging out", error);
@@ -164,7 +193,15 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppwriteContext.Provider
-      value={{ signUp, login, logout, academic_session, session, loading }}
+      value={{
+        signUp,
+        login,
+        logout,
+        academic_session,
+        student_id,
+        session,
+        loading,
+      }}
     >
       {children}
     </AppwriteContext.Provider>
