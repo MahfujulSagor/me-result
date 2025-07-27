@@ -70,12 +70,20 @@ export function NavUser({
               <AvatarFallback className="rounded-lg">ID</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium leading-none">
-                {user.student_id}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {user.academic_session}
-              </p>
+              {user?.student_id ? (
+                <p className="text-sm font-medium leading-none">
+                  {user.student_id}
+                </p>
+              ) : (
+                <Skeleton className="h-3 sm:w-24 w-20 bg-muted-foreground rounded" />
+              )}
+              {user?.academic_session ? (
+                <p className="text-xs text-muted-foreground">
+                  {user.academic_session}
+                </p>
+              ) : (
+                <Skeleton className="h-2 w-16 bg-muted-foreground mt-0.5 rounded" />
+              )}
             </div>
           </div>
         </DropdownMenuLabel>
