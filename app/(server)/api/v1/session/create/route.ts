@@ -13,6 +13,7 @@ export const POST = async (req: NextRequest) => {
     const session = await account.createEmailPasswordSession(email, password);
 
     const response = NextResponse.json({ success: true });
+
     response.cookies.set("session_token", session.secret || "", {
       httpOnly: true,
       path: "/",
