@@ -1,12 +1,13 @@
 import { db } from "@/appwrite/appwrite-server";
 import { NextRequest, NextResponse } from "next/server";
-import { Query } from "node-appwrite";
+import { Query } from "appwrite";
 
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
 const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
 export const GET = async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
+
   const session_token = req.cookies.get("session_token")?.value;
 
   if (!session_token) {
@@ -17,8 +18,6 @@ export const GET = async (req: NextRequest) => {
   const year = searchParams.get("year") as string;
   const session = searchParams.get("session") as string;
   const student_id = searchParams.get("student_id") as string;
-
-  console.log("Search params:", { semester, year, session, student_id });
 
   if (!semester || !year || !session || !student_id) {
     return NextResponse.json(
@@ -42,7 +41,6 @@ export const GET = async (req: NextRequest) => {
         { status: 404 }
       );
     }
-    console.log("Fetched results:", res);
 
     return NextResponse.json(res.documents[0], { status: 200 });
   } catch (error) {

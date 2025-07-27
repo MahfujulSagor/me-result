@@ -29,12 +29,15 @@ import { toast } from "sonner";
 import { useAppwrite } from "@/context/appwrite-context";
 import { Badge } from "@/components/ui/badge";
 import { NavUser } from "@/components/nav-user";
+import { Backlog, StudentResult } from "@/types/resultType";
+import { LoaderIcon } from "lucide-react";
 
 type ResultFormValues = z.infer<typeof resultFormSchema>;
 
-const ResultPortal = () => {
-  const [backlogs, setBacklogs] = React.useState([]);
-  const [result, setResult] = React.useState(null);
+const ResultPortal: React.FC = () => {
+  const [backlogs, setBacklogs] = React.useState<Backlog[]>([]);
+  const [result, setResult] = React.useState<StudentResult | null>(null);
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   const { academic_session, student_id } = useAppwrite();
 
@@ -48,20 +51,18 @@ const ResultPortal = () => {
   });
 
   const onSubmit = async (data: ResultFormValues): Promise<void> => {
-    const query = new URLSearchParams({
-      year: data.year,
-      semester: data.semester,
-      session: academic_session,
-      student_id: student_id,
-    }).toString();
-
     try {
-      const response = await fetch(`/api/v1/get-result?${query}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      setLoading(true);
+
+      const response = await fetch(
+        `/api/v1/get-result?year=${data.year}&semester=${data.semester}&session=${academic_session}&student_id=${student_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         console.error("Failed to fetch result:");
@@ -69,8 +70,9 @@ const ResultPortal = () => {
       }
 
       const result = await response.json();
-      console.log("Result fetched successfully:", result);
+
       setResult(result);
+
       if (result.has_backlogs) {
         const parsed = JSON.parse(result.backlogs);
         setBacklogs(parsed);
@@ -79,21 +81,22 @@ const ResultPortal = () => {
       console.error("Error submitting form:", error);
       return;
     } finally {
+      setLoading(false);
       toast.success("Result fetched successfully!");
-      reset(); // Reset form after submission
+      reset();
     }
   };
 
   return (
-    <div className="">
+    <div className="min-h-screen flex justify-center items-center w-full relative lg:pt-0 pt-30">
       {/* Navbar */}
-      <nav className="py-4 px-4 flex items-center justify-between">
+      <nav className="py-4 px-2 flex items-center justify-between bg-background fixed top-0 left-0 right-0">
         <div className="flex items-center gap-2">
           <div>
-            <Image src={ME} width={60} alt="ME-Logo" />
+            <Image src={ME} width={50} alt="ME-Logo" />
           </div>
-          <h1 className="font-semibold text-2xl tracking-tight">
-            MECHANICAL ENGINEERING
+          <h1 className="font-semibold text-2xl hidden md:flex tracking-tight">
+            Mechanical Engineering
           </h1>
         </div>
 
@@ -107,21 +110,21 @@ const ResultPortal = () => {
         <div className="w-full flex items-center justify-center">
           <Card className="w-full max-w-5xl shadow-2xl shadow-blue-200">
             <CardHeader>
-              <CardTitle className="text-center text-2xl font-medium mt-2">
+              <CardTitle className="text-center lg:text-3xl text-2xl font-semibold mt-2">
                 1st Year 2nd Semester Final Result
               </CardTitle>
             </CardHeader>
             <div>
               <CardContent className="flex items-center justify-center">
-                <div className="w-4xl grid grid-cols-2 gap-2">
+                <div className="w-4xl grid lg:grid-cols-2 grid-cols-1 gap-2">
                   {/* Info Card */}
-                  <Card className="Info-card bg-blue-200/50 shadow-lg">
+                  <Card className="Info-card bg-blue-200/70 border border-blue-200 shadow-lg">
                     <CardHeader>
                       <CardTitle className="text-xl">Student Profile</CardTitle>
                       <CardDescription>Personal Information</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-1 sm:text-lg">
                         <p>
                           <strong>Name:</strong> {result.name}
                         </p>
@@ -145,14 +148,14 @@ const ResultPortal = () => {
                   </Card>
 
                   {/* CG Card */}
-                  <Card className="w-full p-4 bg-cyan-200/50 shadow-lg border rounded-xl">
+                  <Card className="w-full bg-cyan-200/50 border-cyan-200 shadow-lg border rounded-xl">
                     <CardHeader>
                       <CardTitle className="text-xl">
                         Academic Summary
                       </CardTitle>
                       <CardDescription>Overall Performance</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3 text-base">
+                    <CardContent className="space-y-3 sm:text-lg">
                       <div className="flex items-center justify-between">
                         <p>
                           <strong>CGPA:</strong>
@@ -181,8 +184,8 @@ const ResultPortal = () => {
                   </Card>
 
                   {/* Backlogs Card */}
-                  {result.has_backlogs && (
-                    <Card className="w-full col-span-2 p-4 bg-rose-200/50 shadow-lg border rounded-xl">
+                  {result?.has_backlogs && (
+                    <Card className="w-full lg:col-span-2 col-span-1 bg-rose-200/50 border-rose-200 shadow-lg border rounded-xl">
                       <CardHeader>
                         <CardTitle className="text-xl">Backlogs</CardTitle>
                         <CardDescription>Failed Courses</CardDescription>
@@ -191,7 +194,7 @@ const ResultPortal = () => {
                         {backlogs.map((item, index) => (
                           <div
                             key={index}
-                            className="p-3 border border-muted rounded-md bg-muted/50"
+                            className="p-3 border border-rose-300 rounded-md bg-rose-200 sm:text-lg"
                           >
                             <p>
                               <strong>Course:</strong> {item.course}
@@ -206,7 +209,7 @@ const ResultPortal = () => {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-center items-center mt-20">
+              <CardFooter className="flex justify-center items-center mt-10">
                 <Button
                   variant="destructive"
                   onClick={() => {
@@ -221,7 +224,7 @@ const ResultPortal = () => {
           </Card>
         </div>
       ) : (
-        <div className="w-full flex items-center justify-center translate-y-1/2">
+        <div className="w-full flex items-center justify-center">
           <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
             <CardHeader>
               <CardTitle className="flex items-center justify-center">
@@ -294,7 +297,11 @@ const ResultPortal = () => {
                   type="submit"
                   className="w-full bg-blue-500 hover:bg-blue-600"
                 >
-                  Get Result
+                  {loading ? (
+                    <LoaderIcon className="animate-spin h-6 w-6" />
+                  ) : (
+                    "Get Result"
+                  )}
                 </Button>
               </CardFooter>
             </form>

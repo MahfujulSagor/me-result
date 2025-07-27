@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import z from "zod";
 import ME from "@/public/me-logo.png";
 import { useAppwrite } from "@/context/appwrite-context";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LoaderIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 type loginSchema = z.infer<typeof userLoginSchema>;
@@ -31,6 +31,7 @@ const Login: React.FC = () => {
   const { login } = useAppwrite();
 
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   const {
     handleSubmit,
@@ -50,6 +51,8 @@ const Login: React.FC = () => {
   }, [error]);
 
   const onSubmit = async (data: loginSchema): Promise<void> => {
+    setLoading(true);
+
     try {
       await login(data.username.trim().toLocaleUpperCase(), data.password);
     } catch (error) {
@@ -59,6 +62,7 @@ const Login: React.FC = () => {
       );
       return;
     } finally {
+      setLoading(false);
       toast.success("Login successful!");
       reset();
     }
@@ -134,7 +138,11 @@ const Login: React.FC = () => {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600"
             >
-              Login
+              {loading ? (
+                <LoaderIcon className="animate-spin h-6 w-6" />
+              ) : (
+                "Login"
+              )}
             </Button>
           </CardFooter>
         </form>

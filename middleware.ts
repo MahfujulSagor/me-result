@@ -3,8 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
 
-  const isAuthRoute = pathname.startsWith("/auth");
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/auth/login", origin));
+  }
 
+  const isAuthRoute = pathname.startsWith("/auth");
   const sessionToken = req.cookies.get("session_token")?.value;
 
   //? Allow public and system paths
@@ -15,9 +18,7 @@ export async function middleware(req: NextRequest) {
   if (!sessionToken) {
     if (
       isAuthRoute ||
-      pathname.startsWith("/api/v1/session/create") ||
-      pathname.startsWith("/api/v1/session/delete") ||
-      pathname.startsWith("/api/v1/session/validate") ||
+      pathname.startsWith("/api/v1/session") ||
       pathname.startsWith("/api/v1/create-user")
     ) {
       return NextResponse.next(); //? allow login/signup/api
@@ -39,7 +40,6 @@ export async function middleware(req: NextRequest) {
     const isValid = validateRes.status === 200;
 
     if (isValid) {
-      // 🔒 Redirect authenticated users away from /auth/*
       if (isAuthRoute) {
         return NextResponse.redirect(new URL("/result-portal", origin));
       }

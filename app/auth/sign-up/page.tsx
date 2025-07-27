@@ -19,13 +19,14 @@ import z from "zod";
 import ME from "@/public/me-logo.png";
 import { userSchema } from "@/lib/userSchema";
 import { useAppwrite } from "@/context/appwrite-context";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LoaderIcon } from "lucide-react";
 
 type signUpSchema = z.infer<typeof userSchema>;
 
 const SignUp: React.FC = () => {
   const { signUp } = useAppwrite();
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
   const {
     handleSubmit,
     formState: { errors },
@@ -34,6 +35,8 @@ const SignUp: React.FC = () => {
   } = useForm<signUpSchema>({ resolver: zodResolver(userSchema) });
 
   const onSubmit = async (data: signUpSchema): Promise<void> => {
+    setLoading(true);
+
     try {
       await signUp({
         email: data.email.trim().toLocaleLowerCase(),
@@ -46,6 +49,7 @@ const SignUp: React.FC = () => {
         "Failed to sign up. Please check your credentials and try again."
       );
     } finally {
+      setLoading(false);
       reset();
     }
   };
@@ -134,7 +138,11 @@ const SignUp: React.FC = () => {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600"
             >
-              Sign Up
+              {loading ? (
+                <LoaderIcon className="animate-spin h-6 w-6" />
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </CardFooter>
         </form>

@@ -27,11 +27,13 @@ import { z } from "zod";
 import { sessions } from "@/lib/sessions";
 import Image from "next/image";
 import ME from "@/public/me-logo.png";
+import { LoaderIcon } from "lucide-react";
 
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
 const UploadResult: React.FC = () => {
   const [formKey, setFormKey] = React.useState<number>(0);
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   const {
     control,
@@ -41,6 +43,8 @@ const UploadResult: React.FC = () => {
   } = useForm<uploadFormValues>({ resolver: zodResolver(uploadSchema) });
 
   const onSubmit = async (data: uploadFormValues): Promise<void> => {
+    setLoading(true);
+
     const formData = new FormData();
     formData.append("semester", data.semester);
     formData.append("year", data.year);
@@ -60,6 +64,7 @@ const UploadResult: React.FC = () => {
       toast.error("Failed to publish results. Please try again.");
       return;
     } finally {
+      setLoading(false);
       reset();
       toast.success("Results published successfully!");
       setFormKey((prev) => prev + 1); //? Force re-render to reset the form
@@ -70,12 +75,7 @@ const UploadResult: React.FC = () => {
       <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-center">
-            <Image
-              src={ME}
-              alt="ME_logo"
-              width={65}
-              className="object-cover"
-            />
+            <Image src={ME} alt="ME_logo" width={65} className="object-cover" />
           </CardTitle>
           <CardTitle className="text-center mt-2">Publish Results</CardTitle>
         </CardHeader>
@@ -193,10 +193,11 @@ const UploadResult: React.FC = () => {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600"
             >
-              Publish
-            </Button>
-            <Button variant="outline" className="w-full">
-              Cancel
+              {loading ? (
+                <LoaderIcon className="animate-spin h-6 w-6" />
+              ) : (
+                "Publish Results"
+              )}
             </Button>
           </CardFooter>
         </form>

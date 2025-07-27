@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased light`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased light px-2`}
       >
         <Toaster richColors position="top-right" />
         <AppwriteProvider>{children}</AppwriteProvider>
