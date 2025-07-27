@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const origin = process.env.NEXT_PUBLIC_BASE_URL;
-
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const { pathname, origin } = req.nextUrl;
 
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/auth/login", origin));

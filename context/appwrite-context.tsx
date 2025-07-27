@@ -42,6 +42,10 @@ const createSession = async (
   }
 
   try {
+    //? Create client side session in Appwrite
+    await account.createEmailPasswordSession(email, password);
+
+    //? Create server side session via API route
     const res = await fetch("/api/v1/session/create", {
       method: "POST",
       headers: {
@@ -55,9 +59,6 @@ const createSession = async (
       console.error("Failed to log in via server session route");
       return false;
     }
-
-    //? Create client side session in Appwrite
-    await account.createEmailPasswordSession(email, password);
 
     return true;
   } catch (error) {
@@ -209,6 +210,9 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async (): Promise<void> => {
     try {
+      //? Delete client side session in Appwrite
+      await account.deleteSession("current");
+
       const res = await fetch("/api/v1/session/delete", {
         method: "DELETE",
         credentials: "include",
@@ -218,9 +222,6 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to delete session");
         return;
       }
-
-      //? Delete client side session in Appwrite
-      await account.deleteSession("current");
 
       setSession(null);
       setAcademicSession(null);
