@@ -1,4 +1,4 @@
-import { db } from "@/appwrite/appwrite-server";
+import { db, validateSession } from "@/appwrite/appwrite-server";
 import { ID, Query } from "appwrite";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
@@ -13,6 +13,12 @@ export const POST = async (req: NextRequest) => {
 
   if (!session_token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await validateSession();
+
+  if (!user) {
+    return NextResponse.json({ error: "Invalid Session" }, { status: 401 });
   }
 
   const file = formData.get("file") as File;

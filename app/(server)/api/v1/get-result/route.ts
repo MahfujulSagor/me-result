@@ -1,4 +1,4 @@
-import { db } from "@/appwrite/appwrite-server";
+import { db, validateSession } from "@/appwrite/appwrite-server";
 import { NextRequest, NextResponse } from "next/server";
 import { Query } from "appwrite";
 
@@ -12,6 +12,12 @@ export const GET = async (req: NextRequest) => {
 
   if (!session_token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await validateSession();
+
+  if (!user) {
+    return NextResponse.json({ error: "Invalid session" }, { status: 401 });
   }
 
   const semester = searchParams.get("semester") as string;

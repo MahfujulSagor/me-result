@@ -14,7 +14,8 @@ export const POST = async (req: NextRequest) => {
 
   try {
     const session = await account.createEmailPasswordSession(email, password);
-    const session_token = session.secret || "";
+
+    const session_token = session.$id || "";
 
     if (!session_token) {
       return NextResponse.json(
@@ -29,7 +30,7 @@ export const POST = async (req: NextRequest) => {
       secure: true,
       sameSite: "strict",
       path: "/",
-      expires: new Date(session_token ? Date.now() + 60 * 60 * 1000 : 0), // 1 hour
+      expires: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
     });
 
     return response;
