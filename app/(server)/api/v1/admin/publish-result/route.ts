@@ -11,19 +11,17 @@ export const POST = async (req: NextRequest) => {
   const formData = await req.formData();
 
   const session_token = req.cookies.get("session_token")?.value;
-
   if (!session_token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const user = await validateSession(session_token);
-
   if (!user) {
     return NextResponse.json({ error: "Invalid Session" }, { status: 401 });
   }
 
+  //! Authorization: Check if user is admin
   const isAdmin: boolean = user.$id === ADMIN_USER_ID;
-
   if (!isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

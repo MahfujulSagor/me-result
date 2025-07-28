@@ -49,7 +49,7 @@ const createSession = async (
       //? Log out existing session
       await account.deleteSession("current");
     }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     //? If error, assume no session — do nothing
     console.warn("No active session found");
@@ -115,6 +115,7 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+
   React.useEffect(() => {
     getSession();
 
@@ -136,7 +137,7 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     const email = generateEmailFromId(id);
 
     if (!email) {
-      console.error("Invalid student ID format");
+      console.error("Invalid ID format");
       return;
     }
 
@@ -149,25 +150,42 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
       const user = await account.get(); //? pulls preferences
 
-      if (user.prefs?.student_id && user.prefs?.academic_session) {
-        setStudentId(user.prefs?.student_id || null);
-        setAcademicSession(user.prefs?.academic_session || null);
+      if (id === "ADMIN") {
+        if (user.prefs?.student_id && user.prefs?.academic_session) {
+          setStudentId(user.prefs?.student_id || null);
+          setAcademicSession(user.prefs?.academic_session || null);
+        } else {
+          setStudentId(id);
+          setAcademicSession("ADMIN");
+
+          //? persist in Appwrite prefs
+          await account.updatePrefs({
+            student_id: id,
+            academic_session: "ADMIN",
+          });
+        }
       } else {
-        setStudentId(id);
+        if (user.prefs?.student_id && user.prefs?.academic_session) {
+          setStudentId(user.prefs?.student_id || null);
+          setAcademicSession(user.prefs?.academic_session || null);
+        } else {
+          setStudentId(id);
 
-        //? Generate academic session from ID
-        const generatedAcademicSession = generateAcademicSession(id);
-        setAcademicSession(generatedAcademicSession || null);
+          //? Generate academic session from ID
+          const generatedAcademicSession = generateAcademicSession(id);
+          setAcademicSession(generatedAcademicSession || null);
 
-        //? persist in Appwrite prefs
-        await account.updatePrefs({
-          student_id: id,
-          academic_session: generatedAcademicSession,
-        });
+          //? persist in Appwrite prefs
+          await account.updatePrefs({
+            student_id: id,
+            academic_session: generatedAcademicSession,
+          });
+        }
       }
+
       await getSession(); //? refresh context
 
-      router.push("/result-portal");
+      router.push("/");
     } catch (error) {
       console.error("Error logging in. Please check your credentials.", error);
     }
