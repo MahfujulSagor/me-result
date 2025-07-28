@@ -56,7 +56,7 @@ const createSession = async (
     });
 
     if (!res.ok) {
-      console.error("Failed to log in via server session route");
+      console.error("Failed to create server session");
       return false;
     }
 

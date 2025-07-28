@@ -20,14 +20,10 @@ import z from "zod";
 import ME from "@/public/me-logo.png";
 import { useAppwrite } from "@/context/appwrite-context";
 import { Eye, EyeOff, LoaderIcon } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 
 type loginSchema = z.infer<typeof userLoginSchema>;
 
 const Login: React.FC = () => {
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
-
   const { login } = useAppwrite();
 
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
@@ -39,16 +35,6 @@ const Login: React.FC = () => {
     register,
     reset,
   } = useForm<loginSchema>({ resolver: zodResolver(userLoginSchema) });
-
-  React.useEffect(() => {
-    if (error === "session-expired") {
-      toast.error("Session expired. Please log in again.");
-    } else if (error === "no-session") {
-      toast.error("You need to log in to access that page.");
-    } else if (error === "session-error") {
-      toast.error("An error occurred. Please try again.");
-    }
-  }, [error]);
 
   const onSubmit = async (data: loginSchema): Promise<void> => {
     setLoading(true);
