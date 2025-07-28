@@ -9,7 +9,11 @@ const STUDENTS_COLLECTION_ID = process.env.APPWRITE_STUDENTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
   //? Username is expected to be in the format "ME24034" which is the student ID
-  const { email, username, password } = await req.json();
+  const {
+    email,
+    username,
+    password,
+  }: { email: string; username: string; password: string } = await req.json();
 
   if (!email || !username || !password) {
     return NextResponse.json(

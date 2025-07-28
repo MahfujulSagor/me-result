@@ -8,15 +8,16 @@ export const appwrite = new Client()
 export const db = new Databases(appwrite);
 export const account = new Account(appwrite);
 
-export const validateSession = async (session_token: string) => {
+export const validateSession = async (jwt: string) => {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setJWT(session_token);
+    .setJWT(jwt);
 
   const account = new Account(client);
   try {
     const user = await account.get();
+
     return user;
   } catch (error) {
     console.error("Invalid or expired JWT session:", error);

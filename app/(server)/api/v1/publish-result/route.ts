@@ -3,6 +3,7 @@ import { ID, Query } from "appwrite";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
+const ADMIN_USER_ID = process.env.ADMIN_USER_ID!;
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
 const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
@@ -19,6 +20,12 @@ export const POST = async (req: NextRequest) => {
 
   if (!user) {
     return NextResponse.json({ error: "Invalid Session" }, { status: 401 });
+  }
+
+  const isAdmin: boolean = user.$id === ADMIN_USER_ID;
+
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const file = formData.get("file") as File;

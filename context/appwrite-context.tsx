@@ -32,6 +32,7 @@ export const useAppwrite = () => {
   return context;
 };
 
+//* Create a session using email and password
 const createSession = async (
   email: string,
   password: string
@@ -39,6 +40,19 @@ const createSession = async (
   if (!email || !password) {
     console.error("Missing credentials");
     return false;
+  }
+
+  try {
+    //? Check if session exists
+    const currentSession = await account.getSession("current");
+    if (currentSession) {
+      //? Log out existing session
+      await account.deleteSession("current");
+    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    //? If error, assume no session — do nothing
+    console.warn("No active session found");
   }
 
   try {
@@ -85,6 +99,7 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
   );
   const [student_id, setStudentId] = React.useState<string | null>(null);
 
+  //* Fetch current session and user preferences
   const getSession = async (): Promise<void> => {
     try {
       const session = await account.getSession("current");
@@ -108,6 +123,9 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
+  //* Login function
+  //? ID is expected to be the student ID, which is used to generate email and academic session
+  //? Password is the user's password
   const login = async (id: string, password: string): Promise<void> => {
     if (!id || !password) {
       console.error("Missing credentials");
@@ -116,6 +134,11 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
     //? Generate email from ID
     const email = generateEmailFromId(id);
+
+    if (!email) {
+      console.error("Invalid student ID format");
+      return;
+    }
 
     try {
       const success = await createSession(email, password);
@@ -150,6 +173,10 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  //* Sign up function
+  //? Expects email, username, and password
+  //? Creates a new user account and session
+  //? Also generates academic session and student ID based on email
   const signUp = async ({
     email,
     username,
@@ -215,6 +242,9 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  //* Logout function
+  //? Deletes the current session both client-side and server-side
+  //? Resets the context state and redirects to login page
   const logout = async (): Promise<void> => {
     try {
       //? Delete client side session in Appwrite
