@@ -14,7 +14,7 @@ export const GET = async (req: NextRequest) => {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await validateSession();
+  const user = await validateSession(session_token);
 
   if (!user) {
     return NextResponse.json({ error: "Invalid session" }, { status: 401 });

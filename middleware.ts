@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validateSession } from "./appwrite/appwrite-server";
 
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;
@@ -17,6 +18,13 @@ export async function middleware(req: NextRequest) {
     const hasSession = req.cookies.get(`session_token`)?.value;
 
     if (!hasSession) {
+      return NextResponse.redirect(new URL("/auth/login", origin));
+    }
+
+    //? Validate session token
+    const user = await validateSession(hasSession);
+
+    if (!user) {
       return NextResponse.redirect(new URL("/auth/login", origin));
     }
 

@@ -45,24 +45,31 @@ const createSession = async (
     //? Create client side session in Appwrite
     await account.createEmailPasswordSession(email, password);
 
-    //? Create server side session via API route
+    const jwt = await account.createJWT();
+
+    if (!jwt) {
+      console.error("Failed to create JWT session");
+      return false;
+    }
+
+    //? Create server side session with JWT
     const res = await fetch("/api/v1/session/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ jwt: jwt.jwt }),
       credentials: "include",
     });
 
     if (!res.ok) {
-      console.error("Failed to create server session");
+      console.error("Failed to create JWT session");
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error("Server session error:", error);
+    console.error("Server JWT session error:", error);
     return false;
   }
 };
