@@ -52,13 +52,14 @@ const UploadResult: React.FC = () => {
     formData.append("file", data.result);
 
     try {
-      const res = await fetch("/api/v1/admin/results/publish", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        console.error("Failed to publish results");
-      }
+      // const res = await fetch("/api/v1/admin/results/publish", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      // if (!res.ok) {
+      //   console.error("Failed to publish results");
+      // }
+      console.log("Form Data Submitted:", data);
     } catch (error) {
       console.error("Error publishing results:", error);
       toast.error("Failed to publish results. Please try again.");
@@ -70,6 +71,7 @@ const UploadResult: React.FC = () => {
       setFormKey((prev) => prev + 1); //? Force re-render to reset the form
     }
   };
+
   return (
     <div className="w-full min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
