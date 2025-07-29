@@ -28,11 +28,14 @@ import { sessions } from "@/lib/sessions";
 import Image from "next/image";
 import ME from "@/public/me-logo.png";
 import { LoaderIcon } from "lucide-react";
+import { StudentResult } from "@/types/resultType";
+import ResultTable from "@/components/result-table";
 
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
 const UploadResult: React.FC = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [results, setResults] = React.useState<StudentResult[] | null>(null);
 
   const {
     control,
@@ -60,8 +63,11 @@ const UploadResult: React.FC = () => {
         console.error("Failed to publish results");
       }
 
-      console.log("Form Data Submitted:", data);
-      console.log("Extracted data:", await res.json());
+      const responseData: { results: StudentResult[] } = await res.json();
+
+      setResults(responseData.results);
+
+      toast.success("Results extracted successfully!");
     } catch (error) {
       console.error("Error publishing results:", error);
       toast.error("Failed to publish results. Please try again.");
@@ -74,138 +80,168 @@ const UploadResult: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-center">
-            <Image src={ME} alt="ME_logo" width={65} className="object-cover" />
-          </CardTitle>
-          <CardTitle className="text-center mt-2">Publish Results</CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="mb-6">
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="year">Year</Label>
-                <Controller
-                  name="year"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Year" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Year</SelectLabel>
-                          <SelectItem value="1">1st</SelectItem>
-                          <SelectItem value="2">2nd</SelectItem>
-                          <SelectItem value="3">3rd</SelectItem>
-                          <SelectItem value="4">4th</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
+    <>
+      {results ? (
+        <div className="w-full min-h-screen flex items-center justify-center">
+          <Card className="shadow-2xl shadow-blue-200 w-full max-w-4xl">
+            <CardContent>
+              <ResultTable results={results} />
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button
+                onClick={() => {
+                  setResults(null);
+                }}
+                className=""
+                variant={"destructive"}
+              >
+                Cancel
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      ) : (
+        <div className="w-full min-h-screen flex items-center justify-center">
+          <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-center">
+                <Image
+                  src={ME}
+                  alt="ME_logo"
+                  width={65}
+                  className="object-cover"
                 />
-                {errors.year && (
-                  <p className="text-red-500">{errors.year.message}</p>
-                )}
-              </div>
-              <div className="grid gap-2 w-full">
-                <Label htmlFor="semester">Semester</Label>
-                <Controller
-                  name="semester"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Semester" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Semester</SelectLabel>
-                          <SelectItem value="1">1st</SelectItem>
-                          <SelectItem value="2">2nd</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.semester && (
-                  <p className="text-red-500">{errors.semester.message}</p>
-                )}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="session">Session</Label>
-                <Controller
-                  name="session"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Session" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Session</SelectLabel>
-                          {sessions.map((session) => (
-                            <SelectItem
-                              key={session.value}
-                              value={session.value}
-                            >
-                              {session.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.session && (
-                  <p className="text-red-500">{errors.session.message}</p>
-                )}
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="result">
-                  Result{" "}
-                  <span className="text-blue-400">(e.g, example.xlsx)</span>
-                </Label>
-                <Controller
-                  name="result"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="result"
-                      type="file"
-                      accept=".xlsx"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        field.onChange(file);
-                      }}
+              </CardTitle>
+              <CardTitle className="text-center mt-2">
+                Publish Results
+              </CardTitle>
+            </CardHeader>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <CardContent className="mb-6">
+                <div className="flex flex-col gap-6">
+                  <div className="grid gap-2">
+                    <Label htmlFor="year">Year</Label>
+                    <Controller
+                      name="year"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Year</SelectLabel>
+                              <SelectItem value="1">1st</SelectItem>
+                              <SelectItem value="2">2nd</SelectItem>
+                              <SelectItem value="3">3rd</SelectItem>
+                              <SelectItem value="4">4th</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
+                    {errors.year && (
+                      <p className="text-red-500">{errors.year.message}</p>
+                    )}
+                  </div>
+                  <div className="grid gap-2 w-full">
+                    <Label htmlFor="semester">Semester</Label>
+                    <Controller
+                      name="semester"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Semester" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Semester</SelectLabel>
+                              <SelectItem value="1">1st</SelectItem>
+                              <SelectItem value="2">2nd</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.semester && (
+                      <p className="text-red-500">{errors.semester.message}</p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="session">Session</Label>
+                    <Controller
+                      name="session"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Session" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Session</SelectLabel>
+                              {sessions.map((session) => (
+                                <SelectItem
+                                  key={session.value}
+                                  value={session.value}
+                                >
+                                  {session.label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.session && (
+                      <p className="text-red-500">{errors.session.message}</p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="result">
+                      Result{" "}
+                      <span className="text-blue-400">(e.g, example.xlsx)</span>
+                    </Label>
+                    <Controller
+                      name="result"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          id="result"
+                          type="file"
+                          accept=".xlsx"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            field.onChange(file);
+                          }}
+                        />
+                      )}
+                    />
+                    {errors.result && (
+                      <p className="text-red-500">{errors.result.message}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex-col gap-2">
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600"
+                >
+                  {loading ? (
+                    <LoaderIcon className="animate-spin h-6 w-6" />
+                  ) : (
+                    "Publish Results"
                   )}
-                />
-                {errors.result && (
-                  <p className="text-red-500">{errors.result.message}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col gap-2">
-            <Button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600"
-            >
-              {loading ? (
-                <LoaderIcon className="animate-spin h-6 w-6" />
-              ) : (
-                "Publish Results"
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+      )}
+    </>
   );
 };
 

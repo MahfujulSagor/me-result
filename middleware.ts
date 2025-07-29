@@ -29,6 +29,9 @@ export async function middleware(req: NextRequest) {
 
   const sessionToken = req.cookies.get("session_token")?.value;
   if (!sessionToken) {
+    if(pathname.startsWith("/auth")) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL("/auth/login", origin));
   }
 

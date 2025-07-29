@@ -14,12 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <body className="">
+    <main>
       <SidebarProvider>
         <AppSidebar />
         <SidebarTrigger />
         <AdminShell>{children}</AdminShell>
       </SidebarProvider>
-    </body>
+    </main>
   );
 }
