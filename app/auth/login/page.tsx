@@ -59,7 +59,13 @@ const Login: React.FC = () => {
       <Card className="w-full max-w-sm shadow-2xl shadow-blue-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-center">
-            <Image src={ME} alt="ME_logo" width={65} className="object-cover" />
+            <Image
+              src={ME}
+              alt="ME_logo"
+              width={65}
+              priority={true}
+              className="object-cover"
+            />
           </CardTitle>
           <CardTitle className="text-center mt-2">
             Login to your account

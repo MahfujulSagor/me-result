@@ -33,7 +33,7 @@ import ResultTable from "@/components/result-table";
 
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
-const UploadResult: React.FC = () => {
+const PublishResult: React.FC = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [results, setResults] = React.useState<StudentResult[] | null>(null);
 
@@ -44,8 +44,22 @@ const UploadResult: React.FC = () => {
     reset,
   } = useForm<uploadFormValues>({ resolver: zodResolver(uploadSchema) });
 
+  React.useEffect(() => {
+    const savedResults = localStorage.getItem("extractedResults");
+    if (savedResults) {
+      try {
+        const parsed: StudentResult[] = JSON.parse(savedResults);
+        setResults(parsed);
+      } catch (e) {
+        console.error("Failed to parse saved results from localStorage", e);
+        localStorage.removeItem("extractedResults");
+      }
+    }
+  }, []);
+
   const onSubmit = async (data: uploadFormValues): Promise<void> => {
     setLoading(true);
+    localStorage.removeItem("extractedResults");
 
     const formData = new FormData();
     formData.append("semester", data.semester);
@@ -67,7 +81,10 @@ const UploadResult: React.FC = () => {
 
       setResults(responseData.results);
 
-      toast.success("Results extracted successfully!");
+      localStorage.setItem(
+        "extractedResults",
+        JSON.stringify(responseData.results)
+      );
     } catch (error) {
       console.error("Error publishing results:", error);
       toast.error("Failed to publish results. Please try again.");
@@ -75,7 +92,7 @@ const UploadResult: React.FC = () => {
     } finally {
       setLoading(false);
       reset();
-      toast.success("Results published successfully!");
+      toast.success("Results extracted successfully!");
     }
   };
 
@@ -83,19 +100,31 @@ const UploadResult: React.FC = () => {
     <>
       {results ? (
         <div className="w-full min-h-screen flex items-center justify-center">
-          <Card className="shadow-2xl shadow-blue-200 w-full max-w-4xl">
+          <Card className="shadow-2xl shadow-blue-200 w-full max-w-5xl">
             <CardContent>
-              <ResultTable results={results} />
+              <ResultTable results={results} editable={true} />
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-between items-center">
               <Button
                 onClick={() => {
                   setResults(null);
+                  localStorage.removeItem("extractedResults");
                 }}
-                className=""
+                className="cursor-pointer"
                 variant={"destructive"}
               >
                 Cancel
+              </Button>
+
+              <Button
+                onClick={() => {
+                  setResults(null);
+                  localStorage.removeItem("extractedResults");
+                }}
+                className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                variant={"default"}
+              >
+                Publish
               </Button>
             </CardFooter>
           </Card>
@@ -110,6 +139,7 @@ const UploadResult: React.FC = () => {
                   alt="ME_logo"
                   width={65}
                   className="object-cover"
+                  priority={true}
                 />
               </CardTitle>
               <CardTitle className="text-center mt-2">
@@ -245,4 +275,4 @@ const UploadResult: React.FC = () => {
   );
 };
 
-export default UploadResult;
+export default PublishResult;

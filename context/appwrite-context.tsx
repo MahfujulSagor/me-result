@@ -284,6 +284,8 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      localStorage.removeItem("extractedResults");
+
       setSession(null);
       setAcademicSession(null);
       setStudentId(null);
