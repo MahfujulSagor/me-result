@@ -52,14 +52,17 @@ const UploadResult: React.FC = () => {
     formData.append("file", data.result);
 
     try {
-      // const res = await fetch("/api/v1/admin/results/publish", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-      // if (!res.ok) {
-      //   console.error("Failed to publish results");
-      // }
+      const res = await fetch("/api/v1/admin/results/extract", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        console.error("Failed to publish results");
+      }
+
       console.log("Form Data Submitted:", data);
+      console.log("Extracted data:", await res.json());
     } catch (error) {
       console.error("Error publishing results:", error);
       toast.error("Failed to publish results. Please try again.");

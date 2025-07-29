@@ -1,11 +1,8 @@
-import { db, validateJwt } from "@/appwrite/appwrite-server";
-import { ID, Query } from "appwrite";
+import { validateJwt } from "@/appwrite/appwrite-server";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID!;
-const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
-const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
   const formData = await req.formData();
@@ -16,13 +13,7 @@ export const POST = async (req: NextRequest) => {
   }
 
   const user = await validateJwt(session_token);
-  if (!user) {
-    return NextResponse.json({ error: "Invalid Session" }, { status: 401 });
-  }
-
-  //! Authorization: Check if user is admin
-  const isAdmin: boolean = user.$id === ADMIN_USER_ID;
-  if (!isAdmin) {
+  if (!user || user.$id !== ADMIN_USER_ID) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -44,11 +35,12 @@ export const POST = async (req: NextRequest) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
+    const parsedResults = [];
+
     for (const rowRaw of json) {
       const row = rowRaw as Record<string, string | number | boolean | null>;
 
       const headers = Object.keys(row);
-
       const studentIdKey = headers.find((k) =>
         k.toLowerCase().includes("student id")
       );
@@ -64,9 +56,8 @@ export const POST = async (req: NextRequest) => {
       );
       const gradeKey = headers.find((k) => k.toLowerCase().includes("result"));
 
-      if (!studentIdKey || !studentNameKey || !cgpaKey || !totalCreditKey) {
+      if (!studentIdKey || !studentNameKey || !cgpaKey || !totalCreditKey)
         continue;
-      }
 
       const studentId = row[studentIdKey];
       const studentName = row[studentNameKey];
@@ -75,30 +66,10 @@ export const POST = async (req: NextRequest) => {
       const rawBacklogs = backlogsKey ? row[backlogsKey] : "";
       const grade = gradeKey ? row[gradeKey] : "";
 
-      if (!studentId || !cgpa || !totalCredit || !studentName) {
-        continue;
-      }
-
-      //? Sanitation: Check for duplicate
-      const existing = await db.listDocuments(
-        DATABASE_ID,
-        RESULTS_COLLECTION_ID,
-        [
-          Query.equal("student_id", studentId),
-          Query.equal("semester", semester),
-          Query.equal("year", year),
-          Query.equal("session", session),
-        ]
-      );
-
-      if (existing.total > 0) {
-        console.log(`Duplicate found for ${studentId}. Skipping...`);
-        continue;
-      }
+      if (!studentId || !cgpa || !totalCredit || !studentName) continue;
 
       let backlogs = "";
-      //? Backlog handling
-      let has_backlogs: boolean = false;
+      let has_backlogs = false;
 
       if (typeof rawBacklogs === "string" && rawBacklogs.includes("(")) {
         const matches = rawBacklogs.match(/([\d.]+)\(([^)]+)\)/g);
@@ -112,35 +83,25 @@ export const POST = async (req: NextRequest) => {
         }
       }
 
-      const result = await db.createDocument(
-        DATABASE_ID,
-        RESULTS_COLLECTION_ID,
-        ID.unique(),
-        {
-          student_id: studentId,
-          name: studentName,
-          cgpa: cgpa.toString(),
-          total_credit: totalCredit.toString(),
-          has_backlogs,
-          backlogs: backlogs || "",
-          semester,
-          year,
-          session,
-          grade,
-        }
-      );
-
-      console.log("Uploaded result for student:", result);
+      parsedResults.push({
+        student_id: studentId,
+        name: studentName,
+        cgpa: cgpa.toString(),
+        total_credit: totalCredit.toString(),
+        has_backlogs,
+        backlogs: backlogs || "",
+        semester,
+        year,
+        session,
+        grade,
+      });
     }
 
-    return NextResponse.json(
-      { message: "Results uploaded successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({ results: parsedResults }, { status: 200 });
   } catch (error) {
-    console.error("Error uploading results:", error);
+    console.error("Extraction error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Failed to extract results" },
       { status: 500 }
     );
   }

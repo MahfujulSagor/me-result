@@ -23,7 +23,6 @@ export default function RefreshJWT() {
       //? Get current session
       try {
         const currentSession = await account.getSession("current");
-        console.log("Current session:", currentSession);
 
         if (!currentSession) {
           console.error("No active session found");
