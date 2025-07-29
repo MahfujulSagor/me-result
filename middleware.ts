@@ -8,7 +8,7 @@ const blockedRoutes = {
     apis: [],
   },
   user: {
-    routes: ["/publish-result"],
+    routes: ["/admin"],
     apis: ["/api/v1/admin"],
   },
 };
@@ -50,7 +50,7 @@ export async function middleware(req: NextRequest) {
   ) {
     return isAPI
       ? NextResponse.json({ error: "Forbidden for admin" }, { status: 403 })
-      : NextResponse.redirect(new URL("/publish-result", origin));
+      : NextResponse.redirect(new URL("/admin/dashboard", origin));
   }
 
   // ❌ Block users if the path is in user-blocked list
@@ -67,7 +67,7 @@ export async function middleware(req: NextRequest) {
   // 🏠 Redirect root path
   if (pathname === "/") {
     return NextResponse.redirect(
-      new URL(isAdmin ? "/publish-result" : "/result-portal", origin)
+      new URL(isAdmin ? "/admin/dashboard" : "/result-portal", origin)
     );
   }
 
