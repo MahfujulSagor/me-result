@@ -52,7 +52,7 @@ const UploadResult: React.FC = () => {
     formData.append("file", data.result);
 
     try {
-      const res = await fetch("/api/v1/admin/publish-result", {
+      const res = await fetch("/api/v1/admin/results/publish", {
         method: "POST",
         body: formData,
       });

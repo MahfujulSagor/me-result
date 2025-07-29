@@ -15,5 +15,5 @@ export const AdminShell = ({
       </div>
     );
   }
-  return <main>{children}</main>;
+  return <main className="w-full">{children}</main>;
 };

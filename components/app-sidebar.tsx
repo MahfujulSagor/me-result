@@ -3,7 +3,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -13,6 +12,33 @@ import { NavAdmin } from "./nav-admin";
 import { useAppwrite } from "@/context/appwrite-context";
 import Image from "next/image";
 import ME from "@/public/me-logo.png";
+import { NavMain } from "./nav-main";
+import { BookOpen } from "lucide-react";
+
+const data = {
+  navMain: [
+    {
+      title: "Results",
+      url: "#",
+      icon: BookOpen,
+      isActive: true,
+      items: [
+        {
+          title: "Publish",
+          url: "/admin/results/publish",
+        },
+        {
+          title: "View",
+          url: "/admin/results/view",
+        },
+        {
+          title: "Edit",
+          url: "/admin/results/edit",
+        },
+      ],
+    },
+  ],
+};
 
 export function AppSidebar() {
   const { adminId, adminRole } = useAppwrite();
@@ -42,8 +68,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup />
-        <SidebarGroup />
+        <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavAdmin user={{ id: adminId, role: adminRole }} />
