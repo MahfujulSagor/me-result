@@ -32,7 +32,6 @@ import { LoaderIcon } from "lucide-react";
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
 const UploadResult: React.FC = () => {
-  const [formKey, setFormKey] = React.useState<number>(0);
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const {
@@ -71,7 +70,6 @@ const UploadResult: React.FC = () => {
       setLoading(false);
       reset();
       toast.success("Results published successfully!");
-      setFormKey((prev) => prev + 1); //? Force re-render to reset the form
     }
   };
 
@@ -84,7 +82,7 @@ const UploadResult: React.FC = () => {
           </CardTitle>
           <CardTitle className="text-center mt-2">Publish Results</CardTitle>
         </CardHeader>
-        <form key={formKey} onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="mb-6">
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
