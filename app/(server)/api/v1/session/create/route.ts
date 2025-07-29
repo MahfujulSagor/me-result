@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest) => {
       secure: true,
       sameSite: "strict",
       path: "/",
-      expires: new Date(Date.now() + 60 * 60 * 1000), //! 1 hour
+      expires: new Date(Date.now() + 5 * 60 * 60 * 1000), //! 5 hour
     });
 
     return response;

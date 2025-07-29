@@ -19,6 +19,8 @@ type AppwriteContextType = {
   session: Models.Session | null;
   academic_session: string | null;
   student_id: string | null;
+  adminId: string | null;
+  adminRole: string | null;
   loading: boolean;
 };
 
@@ -98,6 +100,8 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [student_id, setStudentId] = React.useState<string | null>(null);
+  const [adminId, setAdminId] = React.useState<string | null>(null);
+  const [adminRole, setAdminRole] = React.useState<string | null>(null);
 
   //* Fetch current session and user preferences
   const getSession = async (): Promise<void> => {
@@ -108,6 +112,8 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
       const user = await account.get(); //? pulls preferences
       setAcademicSession(user.prefs?.academic_session || null);
       setStudentId(user.prefs?.student_id || null);
+      setAdminId(user.prefs?.id || null);
+      setAdminRole(user.prefs?.role || null);
     } catch (error) {
       console.error("Error getting session", error);
       setSession(null);
@@ -151,17 +157,17 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
       const user = await account.get(); //? pulls preferences
 
       if (id === "ADMIN") {
-        if (user.prefs?.student_id && user.prefs?.academic_session) {
-          setStudentId(user.prefs?.student_id || null);
-          setAcademicSession(user.prefs?.academic_session || null);
+        if (user.prefs?.id && user.prefs?.role) {
+          setAdminId(user.prefs?.id || null);
+          setAdminRole(user.prefs?.role || null);
         } else {
-          setStudentId(id);
-          setAcademicSession("ADMIN");
+          setAdminId(id);
+          setAdminRole("ADMIN");
 
           //? persist in Appwrite prefs
           await account.updatePrefs({
-            student_id: id,
-            academic_session: "ADMIN",
+            id: id,
+            role: "ADMIN",
           });
         }
       } else {
@@ -297,6 +303,8 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
         logout,
         academic_session,
         student_id,
+        adminId,
+        adminRole,
         session,
         loading,
       }}

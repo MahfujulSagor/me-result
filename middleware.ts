@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateSession } from "./appwrite/appwrite-server";
+import { validateJwt } from "./appwrite/appwrite-server";
 
-// ✅ Define only blocked paths
+//*  Blocked paths
 const blockedRoutes = {
   admin: {
     routes: ["/result-portal"],
@@ -19,8 +19,10 @@ export async function middleware(req: NextRequest) {
   //? Allow public assets and auth pages
   if (
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
-    pathname.startsWith("/auth") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/images") ||
+    // pathname.startsWith("/auth") ||
+    pathname.startsWith("/refresh-jwt") ||
     pathname.startsWith("/api/v1/session")
   ) {
     return NextResponse.next();
@@ -31,9 +33,30 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", origin));
   }
 
-  const user = await validateSession(sessionToken);
+  const user = await validateJwt(sessionToken);
   if (!user) {
-    return NextResponse.redirect(new URL("/auth/login", origin));
+    //? If JWT is invalid, try to validate session
+    if (!user) {
+      if (pathname.startsWith("/api")) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const redirectUrl = new URL("/refresh-jwt", origin);
+      redirectUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  //! 🚫 Redirect authenticated users away from /auth pages
+  if (pathname.startsWith("/auth")) {
+    return NextResponse.redirect(
+      new URL(
+        user.$id === process.env.ADMIN_USER_ID
+          ? "/admin/dashboard"
+          : "/result-portal",
+        origin
+      )
+    );
   }
 
   const isAdmin = user.$id === process.env.ADMIN_USER_ID;
@@ -42,7 +65,7 @@ export async function middleware(req: NextRequest) {
   const isBlocked = (list: string[]) =>
     list.some((path) => pathname.startsWith(path));
 
-  // ❌ Block admins if the path is in admin-blocked list
+  //! ❌ Block admin if the path is in admin-blocked list
   if (
     isAdmin &&
     ((isAPI && isBlocked(blockedRoutes.admin.apis)) ||
@@ -53,7 +76,7 @@ export async function middleware(req: NextRequest) {
       : NextResponse.redirect(new URL("/admin/dashboard", origin));
   }
 
-  // ❌ Block users if the path is in user-blocked list
+  //! ❌ Block users if the path is in user-blocked list
   if (
     !isAdmin &&
     ((isAPI && isBlocked(blockedRoutes.user.apis)) ||
@@ -64,7 +87,7 @@ export async function middleware(req: NextRequest) {
       : NextResponse.redirect(new URL("/result-portal", origin));
   }
 
-  // 🏠 Redirect root path
+  //* 🏠 Redirect root path
   if (pathname === "/") {
     return NextResponse.redirect(
       new URL(isAdmin ? "/admin/dashboard" : "/result-portal", origin)
