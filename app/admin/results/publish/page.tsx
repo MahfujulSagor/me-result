@@ -44,6 +44,7 @@ const PublishResult: React.FC = () => {
     reset,
   } = useForm<uploadFormValues>({ resolver: zodResolver(uploadSchema) });
 
+  //* Load saved results from localStorage on component mount
   React.useEffect(() => {
     const savedResults = localStorage.getItem("extractedResults");
     if (savedResults) {
