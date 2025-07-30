@@ -23,7 +23,7 @@ import { uploadSchema } from "@/lib/resultUploadSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
-import { sessions } from "@/lib/sessions";
+import { academic_sessions } from "@/lib/academic-sessions";
 import Image from "next/image";
 import ME from "@/public/me-logo.png";
 import { LoaderIcon } from "lucide-react";
@@ -83,6 +83,8 @@ const PublishResult: React.FC = () => {
       setResults(responseData.results);
 
       setItem("extractedResults", responseData.results, 60); //? expire in 60 minutes
+
+      toast.success("Results extracted successfully!");
     } catch (error) {
       console.error("Error publishing results:", error);
       toast.error("Failed to publish results. Please try again.");
@@ -90,7 +92,6 @@ const PublishResult: React.FC = () => {
     } finally {
       setLoading(false);
       reset();
-      toast.success("Results extracted successfully!");
     }
   };
 
@@ -101,6 +102,8 @@ const PublishResult: React.FC = () => {
       toast.error("No data to publish");
       return;
     }
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/v1/admin/results/publish", {
@@ -116,12 +119,15 @@ const PublishResult: React.FC = () => {
         return;
       }
 
-      toast.success("Results published successfully!");
-      setResults(null);
       localStorage.removeItem("extractedResults");
+
+      toast.success("Results published successfully!");
     } catch (err) {
       console.error("Publish error:", err);
       toast.error("Something went wrong");
+    } finally {
+      setResults(null);
+      setLoading(false);
     }
   };
 
@@ -150,7 +156,11 @@ const PublishResult: React.FC = () => {
                 className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
                 variant={"default"}
               >
-                Publish
+                {loading ? (
+                  <LoaderIcon className="animate-spin h-6 w-6" />
+                ) : (
+                  "Publish Results"
+                )}
               </Button>
             </CardFooter>
           </Card>
@@ -238,7 +248,7 @@ const PublishResult: React.FC = () => {
                           <SelectContent>
                             <SelectGroup>
                               <SelectLabel>Session</SelectLabel>
-                              {sessions.map((session) => (
+                              {academic_sessions.map((session) => (
                                 <SelectItem
                                   key={session.value}
                                   value={session.value}
@@ -289,7 +299,7 @@ const PublishResult: React.FC = () => {
                   {loading ? (
                     <LoaderIcon className="animate-spin h-6 w-6" />
                   ) : (
-                    "Publish Results"
+                    "Review Results"
                   )}
                 </Button>
               </CardFooter>

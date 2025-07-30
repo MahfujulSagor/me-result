@@ -41,6 +41,8 @@ const Login: React.FC = () => {
 
     try {
       await login(data.username.trim().toLocaleUpperCase(), data.password);
+
+      toast.success("Login successful!");
     } catch (error) {
       console.error("Error during login:", error);
       toast.error(
@@ -49,7 +51,6 @@ const Login: React.FC = () => {
       return;
     } finally {
       setLoading(false);
-      toast.success("Login successful!");
       reset();
     }
   };

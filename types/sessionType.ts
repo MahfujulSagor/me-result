@@ -1,4 +1,4 @@
-export interface Session {
+export interface Academic_Session {
   value: string;
   label: string;
 }

@@ -20,6 +20,7 @@ const Loader = ({
           src={ME}
           alt="ME_logo"
           width={imageWidth}
+          priority={true}
           className="rounded-full animate-pulse"
         />
       </div>

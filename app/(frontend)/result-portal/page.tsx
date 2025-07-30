@@ -232,6 +232,7 @@ const ResultPortal: React.FC = () => {
                   src={ME}
                   alt="ME_logo"
                   width={65}
+                  priority={true}
                   className="object-cover"
                 />
               </CardTitle>
