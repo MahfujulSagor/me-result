@@ -1,5 +1,5 @@
 import { account, db } from "@/appwrite/appwrite-server";
-import { generateAcademicSession } from "@/lib/generateAcademicSession";
+import { generateAcademicSession } from "@/utils/generateAcademicSessionWithId";
 import { userSchema } from "@/lib/userSchema";
 import { NextRequest, NextResponse } from "next/server";
 import { ID } from "appwrite";

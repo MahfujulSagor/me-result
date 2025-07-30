@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,12 +29,19 @@ import ME from "@/public/me-logo.png";
 import { LoaderIcon } from "lucide-react";
 import { StudentResult } from "@/types/resultType";
 import ResultTable from "@/components/result-table";
+import React, { useRef } from "react";
+import type { ResultTableRef } from "@/components/result-table";
+import { useExpiryStorage } from "@/hooks/useExpiryStorage";
 
 type uploadFormValues = z.infer<typeof uploadSchema>;
 
 const PublishResult: React.FC = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [results, setResults] = React.useState<StudentResult[] | null>(null);
+
+  const tableRef = useRef<ResultTableRef>(null);
+
+  const { getItem, setItem } = useExpiryStorage();
 
   const {
     control,
@@ -46,21 +52,15 @@ const PublishResult: React.FC = () => {
 
   //* Load saved results from localStorage on component mount
   React.useEffect(() => {
-    const savedResults = localStorage.getItem("extractedResults");
-    if (savedResults) {
-      try {
-        const parsed: StudentResult[] = JSON.parse(savedResults);
-        setResults(parsed);
-      } catch (e) {
-        console.error("Failed to parse saved results from localStorage", e);
-        localStorage.removeItem("extractedResults");
-      }
+    const savedResults = getItem("extractedResults"); //? Returns parsed data or null
+    if (savedResults && Array.isArray(savedResults)) {
+      setResults(savedResults);
     }
-  }, []);
+  }, [getItem]);
 
   const onSubmit = async (data: uploadFormValues): Promise<void> => {
     setLoading(true);
-    localStorage.removeItem("extractedResults");
+    setItem("extractedResults", null, 0); //? expire immediately
 
     const formData = new FormData();
     formData.append("semester", data.semester);
@@ -82,10 +82,7 @@ const PublishResult: React.FC = () => {
 
       setResults(responseData.results);
 
-      localStorage.setItem(
-        "extractedResults",
-        JSON.stringify(responseData.results)
-      );
+      setItem("extractedResults", responseData.results, 60); //? expire in 60 minutes
     } catch (error) {
       console.error("Error publishing results:", error);
       toast.error("Failed to publish results. Please try again.");
@@ -97,13 +94,44 @@ const PublishResult: React.FC = () => {
     }
   };
 
+  const handlePublish = async () => {
+    const finalData = tableRef.current?.getFinalData();
+
+    if (!finalData || finalData.length === 0) {
+      toast.error("No data to publish");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/v1/admin/results/publish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ results: finalData }),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to publish results");
+        return;
+      }
+
+      toast.success("Results published successfully!");
+      setResults(null);
+      localStorage.removeItem("extractedResults");
+    } catch (err) {
+      console.error("Publish error:", err);
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <>
       {results ? (
         <div className="w-full min-h-screen flex items-center justify-center">
           <Card className="shadow-2xl shadow-blue-200 w-full max-w-5xl">
             <CardContent>
-              <ResultTable results={results} editable={true} />
+              <ResultTable ref={tableRef} results={results} editable={true} />
             </CardContent>
             <CardFooter className="flex justify-between items-center">
               <Button
@@ -118,10 +146,7 @@ const PublishResult: React.FC = () => {
               </Button>
 
               <Button
-                onClick={() => {
-                  setResults(null);
-                  localStorage.removeItem("extractedResults");
-                }}
+                onClick={handlePublish}
                 className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
                 variant={"default"}
               >

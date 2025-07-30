@@ -1,8 +1,8 @@
 "use client";
 
 import { account } from "@/appwrite/appwrite-client";
-import { generateAcademicSession } from "@/lib/generateAcademicSession";
-import { generateEmailFromId } from "@/lib/generateEmailFromId";
+import { generateAcademicSession } from "@/utils/generateAcademicSessionWithId";
+import { generateEmailFromId } from "@/utils/generateEmailFromId";
 import { userSchema } from "@/lib/userSchema";
 import { Models } from "appwrite";
 import { useRouter } from "next/navigation";
