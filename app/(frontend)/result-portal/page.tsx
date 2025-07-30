@@ -51,18 +51,21 @@ const ResultPortal: React.FC = () => {
   });
 
   const onSubmit = async (data: ResultFormValues): Promise<void> => {
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const response = await fetch(
-        `/api/v1/get-result?year=${data.year}&semester=${data.semester}&session=${academic_session}&student_id=${student_id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    try {
+      const response = await fetch(`/api/v1/get-result`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          year: data.year,
+          semester: data.semester,
+          academic_session: academic_session,
+          student_id: student_id,
+        }),
+      });
 
       if (!response.ok) {
         console.error("Failed to fetch result:");
@@ -77,13 +80,14 @@ const ResultPortal: React.FC = () => {
         const parsed = JSON.parse(result.backlogs);
         setBacklogs(parsed);
       }
+
+      toast.success("Result fetched successfully!");
     } catch (error) {
       console.error("Error submitting form:", error);
       return;
     } finally {
-      setLoading(false);
-      toast.success("Result fetched successfully!");
       reset();
+      setLoading(false);
     }
   };
 
@@ -93,7 +97,7 @@ const ResultPortal: React.FC = () => {
       <nav className="py-4 px-2 flex items-center justify-between bg-background fixed top-0 left-0 right-0">
         <div className="flex items-center gap-2">
           <div>
-            <Image src={ME} width={50} alt="ME-Logo" />
+            <Image src={ME} width={50} priority={true} alt="ME-Logo" />
           </div>
           <h1 className="font-semibold text-2xl hidden md:flex tracking-tight">
             Mechanical Engineering
@@ -245,9 +249,13 @@ const ResultPortal: React.FC = () => {
                     <Label htmlFor="year">Year</Label>
                     <Controller
                       name="year"
+                      defaultValue=""
                       control={control}
                       render={({ field }) => (
-                        <Select onValueChange={field.onChange}>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select Year" />
                           </SelectTrigger>
@@ -272,8 +280,12 @@ const ResultPortal: React.FC = () => {
                     <Controller
                       name="semester"
                       control={control}
+                      defaultValue=""
                       render={({ field }) => (
-                        <Select onValueChange={field.onChange}>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select Semester" />
                           </SelectTrigger>
