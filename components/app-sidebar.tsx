@@ -27,10 +27,10 @@ const data = {
           title: "Publish",
           url: "/admin/results/publish",
         },
-        {
-          title: "View",
-          url: "/admin/results/view",
-        },
+        // {
+        //   title: "View",
+        //   url: "/admin/results/view",
+        // },
         {
           title: "Edit",
           url: "/admin/results/edit",

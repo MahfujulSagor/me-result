@@ -6,4 +6,4 @@ const ViewResults = () => {
   )
 }
 
-export default ViewResults
+export default ViewResults;
