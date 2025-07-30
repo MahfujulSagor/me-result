@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { account, db } from "@/appwrite/appwrite-server";
 import { generateAcademicSession } from "@/utils/generateAcademicSessionWithId";
 import { userSchema } from "@/lib/userSchema";
