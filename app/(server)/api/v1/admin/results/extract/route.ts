@@ -59,12 +59,12 @@ export const POST = async (req: NextRequest) => {
       if (!studentIdKey || !studentNameKey || !cgpaKey || !totalCreditKey)
         continue;
 
-      const studentId = row[studentIdKey];
-      const studentName = row[studentNameKey];
-      const cgpa = row[cgpaKey];
-      const totalCredit = row[totalCreditKey];
-      const rawBacklogs = backlogsKey ? row[backlogsKey] : "";
-      const grade = gradeKey ? row[gradeKey] : "";
+      const studentId = row[studentIdKey] as string;
+      const studentName = row[studentNameKey] as string;
+      const cgpa = row[cgpaKey] as string;
+      const totalCredit = row[totalCreditKey] as string;
+      const rawBacklogs = backlogsKey ? (row[backlogsKey] as string) : "";
+      const grade = gradeKey ? (row[gradeKey] as string) : "";
 
       if (!studentId || !cgpa || !totalCredit || !studentName) continue;
 
@@ -84,15 +84,15 @@ export const POST = async (req: NextRequest) => {
       }
 
       parsedResults.push({
-        student_id: studentId,
+        student_id: studentId.toLocaleUpperCase().trim(),
         name: studentName,
         cgpa: cgpa.toString(),
         total_credit: totalCredit.toString(),
         has_backlogs,
         backlogs: backlogs || "",
-        semester,
-        year,
-        session,
+        semester: semester.trim(),
+        year: year.trim(),
+        academic_session: session.trim(),
         grade,
       });
     }

@@ -125,7 +125,8 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
       <div className="max-h-[75vh] max-w-5xl overflow-y-auto w-full">
         <Table>
           <TableCaption>
-            {data?.[0]?.year} Year {data?.[0]?.semester} Semester Final Results
+            {data?.[0]?.academic_session} Session {data?.[0]?.year} Year{" "}
+            {data?.[0]?.semester} Semester Final Results
           </TableCaption>
           <TableHeader>
             <TableRow>
@@ -151,7 +152,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
               }
 
               return (
-                <TableRow key={i} className={isEditing ? "bg-muted/50" : ""}>
+                <TableRow key={i} className={isEditing ? "bg-muted" : ""}>
                   <TableCell>
                     {isEditing ? (
                       <Input

@@ -1,14 +1,14 @@
 import { db, validateJwt } from "@/appwrite/appwrite-server";
-import { ID, Query } from "appwrite";
+import { StudentResult } from "@/types/resultType";
+import { ID, Models, Query } from "appwrite";
 import { NextRequest, NextResponse } from "next/server";
-import * as XLSX from "xlsx";
 
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID!;
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID!;
 const RESULTS_COLLECTION_ID = process.env.APPWRITE_RESULTS_COLLECTION_ID!;
 
 export const POST = async (req: NextRequest) => {
-  const formData = await req.formData();
+  const { results } = await req.json();
 
   const session_token = req.cookies.get("session_token")?.value;
   if (!session_token) {
@@ -20,125 +20,95 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json({ error: "Invalid Session" }, { status: 401 });
   }
 
-  //! Authorization: Check if user is admin
-  const isAdmin: boolean = user.$id === ADMIN_USER_ID;
-  if (!isAdmin) {
+  if (user.$id !== ADMIN_USER_ID) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const file = formData.get("file") as File;
-  const semester = formData.get("semester") as string;
-  const year = formData.get("year") as string;
-  const session = formData.get("Session") as string;
-
-  if (!file || !semester || !year || !session) {
+  if (!Array.isArray(results) || results.length === 0) {
     return NextResponse.json(
-      { error: "Missing required fields" },
+      { error: "Invalid results data" },
       { status: 400 }
     );
   }
 
+  //   //? Trim all string fields in the results array
+  const trimString = (s: string) => s.trim();
+
+  const trimmedResults: StudentResult[] = results.map((r) => ({
+    ...r,
+    student_id: trimString(r.student_id),
+    semester: trimString(r.semester),
+    year: trimString(r.year),
+    academic_session: trimString(r.academic_session),
+  }));
+
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    const created: Models.Document[] = [];
+    const failed: StudentResult[] = [];
+    const existingResults: Models.Document[] = [];
 
-    for (const rowRaw of json) {
-      const row = rowRaw as Record<string, string | number | boolean | null>;
+    const promises = trimmedResults.map(async (r) => {
+      try {
+        const existingResult = await db.listDocuments(
+          DATABASE_ID,
+          RESULTS_COLLECTION_ID,
+          [
+            Query.equal("student_id", r.student_id),
+            Query.equal("academic_session", r.academic_session),
+            Query.equal("year", r.year),
+            Query.equal("semester", r.semester),
+          ]
+        );
 
-      const headers = Object.keys(row);
+        const documents = existingResult?.documents;
 
-      const studentIdKey = headers.find((k) =>
-        k.toLowerCase().includes("student id")
-      );
-      const studentNameKey = headers.find((k) =>
-        k.toLowerCase().includes("name")
-      );
-      const cgpaKey = headers.find((k) => k.toLowerCase().includes("gpa"));
-      const totalCreditKey = headers.find((k) =>
-        k.toLowerCase().includes("credit earned")
-      );
-      const backlogsKey = headers.find((k) =>
-        k.toLowerCase().includes("lost credit")
-      );
-      const gradeKey = headers.find((k) => k.toLowerCase().includes("result"));
+        if (documents.length === 0 || !documents[0]) {
+          //? No existing result found, create a new one
+          try {
+            const createdResult = await db.createDocument(
+              DATABASE_ID,
+              RESULTS_COLLECTION_ID,
+              ID.unique(),
+              r
+            );
 
-      if (!studentIdKey || !studentNameKey || !cgpaKey || !totalCreditKey) {
-        continue;
-      }
-
-      const studentId = row[studentIdKey];
-      const studentName = row[studentNameKey];
-      const cgpa = row[cgpaKey];
-      const totalCredit = row[totalCreditKey];
-      const rawBacklogs = backlogsKey ? row[backlogsKey] : "";
-      const grade = gradeKey ? row[gradeKey] : "";
-
-      if (!studentId || !cgpa || !totalCredit || !studentName) {
-        continue;
-      }
-
-      //? Sanitation: Check for duplicate
-      const existing = await db.listDocuments(
-        DATABASE_ID,
-        RESULTS_COLLECTION_ID,
-        [
-          Query.equal("student_id", studentId),
-          Query.equal("semester", semester),
-          Query.equal("year", year),
-          Query.equal("session", session),
-        ]
-      );
-
-      if (existing.total > 0) {
-        console.log(`Duplicate found for ${studentId}. Skipping...`);
-        continue;
-      }
-
-      let backlogs = "";
-      //? Backlog handling
-      let has_backlogs: boolean = false;
-
-      if (typeof rawBacklogs === "string" && rawBacklogs.includes("(")) {
-        const matches = rawBacklogs.match(/([\d.]+)\(([^)]+)\)/g);
-        if (matches) {
-          has_backlogs = true;
-          const parsed = matches.map((entry) => {
-            const [, credit, course] = entry.match(/([\d.]+)\(([^)]+)\)/)!;
-            return { course, credit_lost: parseFloat(credit) };
-          });
-          backlogs = JSON.stringify(parsed);
+            if (!createdResult) {
+              console.error("❌ Failed to create result for ", r.student_id);
+              failed.push(r);
+            } else {
+              created.push(createdResult);
+              console.log("✅ Created result for ", createdResult.student_id);
+            }
+          } catch (error) {
+            console.error("Error creating new result: ", error);
+          }
+        } else {
+          //? If an existing result is found, add it to the existingResults array
+          existingResults.push(documents[0]);
         }
+      } catch (error) {
+        console.error("Error checking duplicate result data: ", error);
       }
+    });
 
-      const result = await db.createDocument(
-        DATABASE_ID,
-        RESULTS_COLLECTION_ID,
-        ID.unique(),
-        {
-          student_id: studentId,
-          name: studentName,
-          cgpa: cgpa.toString(),
-          total_credit: totalCredit.toString(),
-          has_backlogs,
-          backlogs: backlogs || "",
-          semester,
-          year,
-          session,
-          grade,
-        }
-      );
+    await Promise.all(promises);
 
-      console.log("Uploaded result for student:", result);
-    }
+    console.log({
+      message: "Results processing summary",
+      created: created.length,
+      failed: failed.length,
+      existingResults: existingResults.length,
+      totalResults: trimmedResults.length,
+    });
 
-    return NextResponse.json(
-      { message: "Results uploaded successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      message: "Results published successfully",
+      created: created.length,
+      failed: failed.length,
+      existingResults: existingResults.length,
+    });
   } catch (error) {
-    console.error("Error uploading results:", error);
+    console.error("Error publishing results:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
