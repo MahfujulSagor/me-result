@@ -68,7 +68,7 @@ const ResultPortal: React.FC = () => {
       });
 
       if (!response.ok) {
-        console.error("Failed to fetch result:");
+        console.error("Failed to fetch result:", response.statusText);
         return;
       }
 
