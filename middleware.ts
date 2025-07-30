@@ -13,8 +13,10 @@ const blockedRoutes = {
   },
 };
 
+const origin = process.env.NEXT_PUBLIC_BASE_URL!;
+
 export async function middleware(req: NextRequest) {
-  const { pathname, origin } = req.nextUrl;
+  const { pathname } = req.nextUrl;
 
   //? Allow public assets and auth pages
   if (
@@ -29,7 +31,7 @@ export async function middleware(req: NextRequest) {
 
   const sessionToken = req.cookies.get("session_token")?.value;
   if (!sessionToken) {
-    if(pathname.startsWith("/auth")) {
+    if (pathname.startsWith("/auth")) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL("/auth/login", origin));
