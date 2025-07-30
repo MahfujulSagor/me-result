@@ -22,7 +22,7 @@ export interface ResultTableRef {
 
 interface Props {
   results: StudentResult[] | null;
-  editable: boolean;
+  editable?: boolean;
 }
 
 //? Restrict editable student fields
@@ -32,7 +32,7 @@ type EditableStudentField = keyof Pick<
 >;
 
 const ResultTable = forwardRef<ResultTableRef, Props>(
-  ({ results, editable }, ref) => {
+  ({ results, editable = false }, ref) => {
     const [data, setData] = useState<StudentResult[] | null>(results);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -123,7 +123,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
 
     return (
       <div className="max-h-[75vh] max-w-5xl overflow-y-auto w-full">
-        <Table>
+        <Table className="table-auto w-full">
           <TableCaption>
             {data?.[0]?.academic_session} Session {data?.[0]?.year} Year{" "}
             {data?.[0]?.semester} Semester Final Results
@@ -132,10 +132,12 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
             <TableRow>
               <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Credits Earned</TableHead>
+              <TableHead className="whitespace-nowrap">
+                Credits Earned
+              </TableHead>
               <TableHead>Backlogs</TableHead>
-              <TableHead>CGPA</TableHead>
-              <TableHead>Grade</TableHead>
+              <TableHead className="whitespace-nowrap">CGPA</TableHead>
+              <TableHead className="whitespace-nowrap">Grade</TableHead>
               {editable && <TableHead className="text-center">Edit</TableHead>}
             </TableRow>
           </TableHeader>
@@ -152,8 +154,8 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
               }
 
               return (
-                <TableRow key={i} className={isEditing ? "bg-muted" : ""}>
-                  <TableCell>
+                <TableRow key={i} className={isEditing ? "bg-muted/80" : ""}>
+                  <TableCell className="">
                     {isEditing ? (
                       <Input
                         value={student.student_id}
@@ -161,12 +163,13 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                           handleFieldChange(i, "student_id", e.target.value)
                         }
                         type="text"
+                        className=""
                       />
                     ) : (
                       student.student_id
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="">
                     {isEditing ? (
                       <Input
                         value={student.name}
@@ -174,12 +177,13 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                           handleFieldChange(i, "name", e.target.value)
                         }
                         type="text"
+                        className=""
                       />
                     ) : (
                       student.name
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {isEditing ? (
                       <Input
                         value={student.total_credit}
@@ -187,6 +191,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                           handleFieldChange(i, "total_credit", e.target.value)
                         }
                         type="text"
+                        className=""
                       />
                     ) : (
                       student.total_credit
@@ -198,11 +203,12 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                         {backlogs.map((b, j) => (
                           <div
                             key={j}
-                            className="grid grid-cols-3 gap-1 items-center"
+                            className="grid grid-cols-1 gap-1 items-center"
                           >
                             <Input
                               value={b.course}
                               placeholder="Course"
+                              className="col-span-2"
                               onChange={(e) =>
                                 handleBacklogChange(
                                   i,
@@ -216,6 +222,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                             <Input
                               value={b.credit_lost}
                               placeholder="Credit"
+                              className=""
                               onChange={(e) =>
                                 handleBacklogChange(
                                   i,
@@ -230,6 +237,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                               type="button"
                               size="icon"
                               variant="ghost"
+                              className="cursor-pointer border hover:border-red-500"
                               onClick={() => removeBacklog(i, j)}
                             >
                               <Trash2 className="w-4 h-4 text-red-500" />
@@ -240,13 +248,13 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                           type="button"
                           variant="outline"
                           onClick={() => addBacklog(i)}
-                          className="mt-1 w-fit"
+                          className="mt-1 w-fit cursor-pointer"
                         >
                           <Plus className="w-4 h-4 mr-1" /> Add Backlog
                         </Button>
                       </div>
                     ) : (
-                      <div className="whitespace-pre-wrap">
+                      <div className="">
                         {backlogs.map((b, j) => (
                           <div key={j}>
                             {b.course} ({b.credit_lost})
@@ -255,7 +263,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {isEditing ? (
                       <Input
                         value={student.cgpa}
@@ -268,7 +276,7 @@ const ResultTable = forwardRef<ResultTableRef, Props>(
                       student.cgpa
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {isEditing ? (
                       <Input
                         value={student.grade}
