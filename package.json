@@ -26,7 +26,6 @@
     "lucide-react": "^0.522.0",
     "motion": "^12.23.9",
     "next": "15.3.4",
-    "node-appwrite": "^17.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.60.0",

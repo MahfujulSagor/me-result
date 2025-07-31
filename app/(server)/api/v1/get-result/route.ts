@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import { db, validateJwt } from "@/appwrite/appwrite-server";
 import { NextRequest, NextResponse } from "next/server";
 import { Query } from "appwrite";
