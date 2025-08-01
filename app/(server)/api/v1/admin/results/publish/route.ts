@@ -36,7 +36,7 @@ export const POST = async (req: NextRequest) => {
 
   const trimmedResults: StudentResult[] = results.map((r) => ({
     ...r,
-    student_id: trimString(r.student_id),
+    student_id: trimString(r.student_id.toUpperCase()),
     semester: trimString(r.semester),
     year: trimString(r.year),
     academic_session: trimString(r.academic_session),
@@ -53,7 +53,7 @@ export const POST = async (req: NextRequest) => {
           DATABASE_ID,
           RESULTS_COLLECTION_ID,
           [
-            Query.equal("student_id", r.student_id),
+            Query.equal("student_id", r.student_id.toUpperCase()),
             Query.equal("academic_session", r.academic_session),
             Query.equal("year", r.year),
             Query.equal("semester", r.semester),
@@ -69,7 +69,16 @@ export const POST = async (req: NextRequest) => {
               DATABASE_ID,
               RESULTS_COLLECTION_ID,
               ID.unique(),
-              r
+              {
+                ...r,
+                student_id: r.student_id.toUpperCase().trim(),
+                semester: r.semester.trim(),
+                year: r.year.trim(),
+                academic_session: r.academic_session.trim(),
+                grade: r.grade?.toUpperCase().trim(),
+                cgpa: r.cgpa?.trim(),
+                total_credit: r.total_credit?.trim(),
+              }
             );
 
             if (!createdResult) {

@@ -37,10 +37,10 @@ export const POST = async (req: NextRequest) => {
 
   try {
     const res = await db.listDocuments(DATABASE_ID, RESULTS_COLLECTION_ID, [
-      Query.equal("student_id", student_id),
-      Query.equal("academic_session", academic_session),
-      Query.equal("year", year),
-      Query.equal("semester", semester),
+      Query.equal("student_id", student_id.trim().toUpperCase()),
+      Query.equal("academic_session", academic_session.trim()),
+      Query.equal("year", year.trim()),
+      Query.equal("semester", semester.trim()),
     ]);
 
     if (res.documents.length === 0) {

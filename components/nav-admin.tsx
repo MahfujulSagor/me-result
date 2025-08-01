@@ -34,7 +34,7 @@ export function NavAdmin({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="shadow-sm shadow-blue-200 flex items-center sm:min-w-56 min-w-46 min-h-12 gap-2 px-3 py-2 text-sm hover:bg-muted rounded-lg"
+          className="shadow-sm shadow-blue-200 flex cursor-pointer items-center sm:min-w-56 min-w-46 min-h-12 gap-2 px-3 py-2 text-sm hover:bg-muted rounded-lg"
         >
           <Avatar className="h-8 w-8 rounded-lg">
             <AvatarFallback className="rounded-lg">ME</AvatarFallback>

@@ -153,7 +153,7 @@ const PublishResult: React.FC = () => {
 
               <Button
                 onClick={handlePublish}
-                className="bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                className="bg-blue-500 hover:bg-blue-600 cursor-pointer"
                 variant={"default"}
               >
                 {loading ? (

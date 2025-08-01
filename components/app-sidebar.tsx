@@ -13,7 +13,7 @@ import { useAppwrite } from "@/context/appwrite-context";
 import Image from "next/image";
 import ME from "@/public/me-logo.png";
 import { NavMain } from "./nav-main";
-import { BookOpen } from "lucide-react";
+import { BookOpen, LayoutDashboard } from "lucide-react";
 
 const data = {
   navMain: [
@@ -27,13 +27,23 @@ const data = {
           title: "Publish",
           url: "/admin/results/publish",
         },
-        // {
-        //   title: "View",
-        //   url: "/admin/results/view",
-        // },
         {
           title: "Edit",
           url: "/admin/results/edit",
+        },
+      ],
+    },
+  ],
+  navDashboard: [
+    {
+      title: "Dashboard",
+      url: "#",
+      icon: LayoutDashboard,
+      isActive: true,
+      items: [
+        {
+          title: "Statistics",
+          url: "/admin/dashboard",
         },
       ],
     },
@@ -68,6 +78,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <NavMain items={data.navDashboard} />
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
