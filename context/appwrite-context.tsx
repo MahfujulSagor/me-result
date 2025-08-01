@@ -51,10 +51,9 @@ const createSession = async (
       //? Log out existing session
       await account.deleteSession("current");
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     //? If error, assume no session — do nothing
-    console.warn("No active session found");
+    console.warn("No active session found", error);
   }
 
   try {
@@ -155,17 +154,17 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
 
       const user = await account.get(); //? pulls preferences
 
-      if (id === "ADMIN") {
+      if (id.trim().toUpperCase() === "ADMIN") {
         if (user.prefs?.id && user.prefs?.role) {
           setAdminId(user.prefs?.id || null);
           setAdminRole(user.prefs?.role || null);
         } else {
-          setAdminId(id);
+          setAdminId(id.trim().toUpperCase());
           setAdminRole("ADMIN");
 
           //? persist in Appwrite prefs
           await account.updatePrefs({
-            id: id,
+            id: id.trim().toUpperCase(),
             role: "ADMIN",
           });
         }
@@ -174,15 +173,17 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
           setStudentId(user.prefs?.student_id || null);
           setAcademicSession(user.prefs?.academic_session || null);
         } else {
-          setStudentId(id);
+          setStudentId(id.trim().toUpperCase());
 
           //? Generate academic session from ID
-          const generatedAcademicSession = generateAcademicSession(id);
+          const generatedAcademicSession = generateAcademicSession(
+            id.trim().toUpperCase()
+          );
           setAcademicSession(generatedAcademicSession || null);
 
           //? persist in Appwrite prefs
           await account.updatePrefs({
-            student_id: id,
+            student_id: id.trim().toUpperCase(),
             academic_session: generatedAcademicSession,
           });
         }
@@ -197,9 +198,6 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
   };
 
   //* Sign up function
-  //? Expects email, username, and password
-  //? Creates a new user account and session
-  //? Also generates academic session and student ID based on email
   const signUp = async ({
     email,
     username,
@@ -266,8 +264,6 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
   };
 
   //* Logout function
-  //? Deletes the current session both client-side and server-side
-  //? Resets the context state and redirects to login page
   const logout = async (): Promise<void> => {
     try {
       //? Delete client side session in Appwrite

@@ -4,12 +4,12 @@ import { validateJwt } from "./appwrite/appwrite-server";
 //*  Blocked paths
 const blockedRoutes = {
   admin: {
-    routes: ["/result-portal"],
+    routes: ["/result-portal"], //? Admins should not access result portal
     apis: [],
   },
   user: {
-    routes: ["/admin"],
-    apis: ["/api/v1/admin"],
+    routes: ["/admin"], //? Users should not access admin routes
+    apis: ["/api/v1/admin"], //? Users should not access admin APIs
   },
 };
 
@@ -54,15 +54,17 @@ export async function middleware(req: NextRequest) {
 
   //! 🚫 Redirect authenticated users away from /auth pages
   if (pathname.startsWith("/auth")) {
-    const route = user.$id === ADMIN_ID ? "/admin/dashboard" : "/result-portal";
+    const route: string =
+      user.$id === ADMIN_ID ? "/admin/dashboard" : "/result-portal";
     return NextResponse.redirect(new URL(route, origin));
   }
 
-  const isAdmin = user.$id === ADMIN_ID;
-  const isAPI = pathname.startsWith("/api");
+  const isAdmin: boolean = user.$id === ADMIN_ID;
+  const isAPI: boolean = pathname.startsWith("/api");
 
-  const isBlocked = (list: string[]) =>
-    list.some((path) => pathname.startsWith(path));
+  const isBlocked = (list: string[]): boolean => {
+    return list.some((path) => pathname.startsWith(path));
+  };
 
   //! ❌ Block admin if the path is in admin-blocked list
   if (
