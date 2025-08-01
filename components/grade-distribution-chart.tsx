@@ -30,7 +30,7 @@ interface Props {
 
 export function GradeDistributionChart({ data, academicDetails }: Props) {
   return (
-    <Card className="w-full max-w-4xl mx-auto shadow-xl border border-muted p-4">
+    <Card className="w-full max-w-4xl mx-auto border border-muted p-4 shadow-2xl shadow-blue-200">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">
           {academicDetails?.academic_session} - {academicDetails?.year} Year{" "}
