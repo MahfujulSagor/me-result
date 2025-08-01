@@ -14,6 +14,7 @@ const blockedRoutes = {
 };
 
 const origin = process.env.NEXT_PUBLIC_BASE_URL!;
+const ADMIN_ID = process.env.ADMIN_USER_ID!;
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -53,17 +54,11 @@ export async function middleware(req: NextRequest) {
 
   //! 🚫 Redirect authenticated users away from /auth pages
   if (pathname.startsWith("/auth")) {
-    return NextResponse.redirect(
-      new URL(
-        user.$id === process.env.ADMIN_USER_ID
-          ? "/admin/dashboard"
-          : "/result-portal",
-        origin
-      )
-    );
+    const route = user.$id === ADMIN_ID ? "/admin/dashboard" : "/result-portal";
+    return NextResponse.redirect(new URL(route, origin));
   }
 
-  const isAdmin = user.$id === process.env.ADMIN_USER_ID;
+  const isAdmin = user.$id === ADMIN_ID;
   const isAPI = pathname.startsWith("/api");
 
   const isBlocked = (list: string[]) =>
