@@ -131,8 +131,7 @@ export const AppwriteProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   //* Login function
-  //? ID is expected to be the student ID, which is used to generate email and academic session
-  //? Password is the user's password
+  //? ID is expected to be the student ID
   const login = async (id: string, password: string): Promise<void> => {
     if (!id || !password) {
       console.error("Missing credentials");
