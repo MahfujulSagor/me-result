@@ -58,10 +58,17 @@ export const GET = async (req: NextRequest) => {
       gradeMap[grade] = (gradeMap[grade] || 0) + 1;
     }
 
-    //? Convert to array
+    //? Academic grade order
+    const gradeOrder = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "D", "F"];
+
+    //? Convert to array and sort by academic grade order
     const formatted = Object.entries(gradeMap)
       .map(([grade, count]) => ({ grade, count }))
-      .sort((a, b) => b.count - a.count); //? Sort by count
+      .sort((a, b) => {
+        const indexA = gradeOrder.indexOf(a.grade); //? Use index to determine order
+        const indexB = gradeOrder.indexOf(b.grade); //? Use index to determine order
+        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB); //? Place unknown grades at the end
+      });
 
     return NextResponse.json({ results: formatted }, { status: 200 });
   } catch (error) {
