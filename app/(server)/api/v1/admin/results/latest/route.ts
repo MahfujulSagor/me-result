@@ -70,7 +70,13 @@ export const GET = async (req: NextRequest) => {
         return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB); //? Place unknown grades at the end
       });
 
-    return NextResponse.json({ results: formatted }, { status: 200 });
+    return NextResponse.json(
+      {
+        results: formatted,
+        academic_details: { academic_session, semester, year },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching latest results:", error);
     return NextResponse.json(

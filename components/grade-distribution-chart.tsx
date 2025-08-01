@@ -17,16 +17,24 @@ type GradeData = {
   count: number;
 };
 
+type AcademicDetails = {
+  academic_session: string;
+  semester: string;
+  year: string;
+};
+
 interface Props {
   data: GradeData[];
+  academicDetails: AcademicDetails | null;
 }
 
-export function GradeDistributionChart({ data }: Props) {
+export function GradeDistributionChart({ data, academicDetails }: Props) {
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl border border-muted p-4">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">
-          Grade Distribution
+          {academicDetails?.academic_session} - {academicDetails?.year} Year{" "}
+          {academicDetails?.semester} Semester
         </CardTitle>
       </CardHeader>
       <CardContent className="h-96">

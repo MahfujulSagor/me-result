@@ -10,6 +10,11 @@ const Dashboard = () => {
   const [results, setResults] = React.useState<
     { grade: string; count: number }[]
   >([]);
+  const [academic_details, setAcademicDetails] = React.useState<{
+    academic_session: string;
+    semester: string;
+    year: string;
+  } | null>(null);
 
   React.useEffect(() => {
     const fetchResults = async () => {
@@ -23,10 +28,13 @@ const Dashboard = () => {
           toast.error("Failed to fetch results");
         }
 
-        const { results } = await response.json();
+        const { results, academic_details } = await response.json();
 
         setResults(results);
+        setAcademicDetails(academic_details);
+
         setItem("grade-distribution-data", results, 2 * 60 * 60 * 1000); //? Cache for 2 hour
+        setItem("academic_details", academic_details, 2 * 60 * 60 * 1000); //? Cache for 2 hour
       } catch (error) {
         console.error("Error fetching results:", error);
         toast.error("Failed to fetch results");
@@ -35,16 +43,21 @@ const Dashboard = () => {
 
     //? Check if cached data exists
     const cachedData = getItem("grade-distribution-data");
+    const cachedAcademicDetails = getItem("academic_details");
 
-    if (cachedData) {
+    if (cachedData && cachedAcademicDetails) {
       setResults(cachedData);
+      setAcademicDetails(cachedAcademicDetails);
     } else {
       fetchResults();
     }
   }, [getItem, setItem]);
   return (
     <div className="w-full min-h-screen flex justify-center items-center">
-      <GradeDistributionChart data={results} />
+      <GradeDistributionChart
+        data={results}
+        academicDetails={academic_details}
+      />
     </div>
   );
 };
