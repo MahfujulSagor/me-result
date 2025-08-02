@@ -25,7 +25,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/refresh-jwt") ||
-    pathname.startsWith("/api/v1/session")
+    pathname.startsWith("/api/v1/session") ||
+    pathname.startsWith("/api/v1/create-user")
   ) {
     return NextResponse.next();
   }

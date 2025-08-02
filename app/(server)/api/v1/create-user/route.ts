@@ -52,8 +52,6 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    console.log("User account created successfully:", studentAccount);
-
     const student = await db.createDocument(
       DATABASE_ID,
       STUDENTS_COLLECTION_ID,
@@ -71,8 +69,6 @@ export const POST = async (req: NextRequest) => {
         { status: 500 }
       );
     }
-
-    console.log("Student document created successfully:", student);
 
     const { academic_session, student_id } = student;
 
