@@ -98,7 +98,7 @@ const SignUp: React.FC = () => {
                     id="email"
                     type="email"
                     className="lowercase"
-                    placeholder="email"
+                    placeholder="e.g. me24001@mbstu.ac.bd"
                     {...register("email")}
                     required
                   />
