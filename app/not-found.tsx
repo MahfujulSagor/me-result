@@ -1,5 +1,4 @@
 "use client";
-import NumberTicker from "@/components/fancy/text/basic-number-ticker";
 import CenterUnderline from "@/components/fancy/text/underline-center";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -10,12 +9,7 @@ const NotFound = () => {
     <div className="w-full min-h-screen flex flex-col items-center justify-center">
       <div className="w-full max-w-2xl flex flex-col items-center justify-center text-center space-y-4">
         <h1 className="lg:text-[340px] md:text-[240px] text-9xl font-extrabold">
-          <NumberTicker
-            from={0}
-            target={404}
-            autoStart={true}
-            transition={{ duration: 1.5, type: "tween", ease: "easeInOut" }}
-          />
+          404
         </h1>
         <h2 className="lg:text-6xl text-4xl font-bold text-muted-foreground">
           Hmm...
