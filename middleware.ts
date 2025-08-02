@@ -42,15 +42,13 @@ export async function middleware(req: NextRequest) {
   const user = await validateJwt(sessionToken);
   if (!user) {
     //? If JWT is invalid, try to validate session
-    if (!user) {
-      if (pathname.startsWith("/api")) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
-      const redirectUrl = new URL("/refresh-jwt", origin);
-      redirectUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(redirectUrl);
+    if (pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const redirectUrl = new URL("/refresh-jwt", origin);
+    redirectUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   //! 🚫 Redirect authenticated users away from /auth pages
