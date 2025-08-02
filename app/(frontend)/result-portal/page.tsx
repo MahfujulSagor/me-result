@@ -115,7 +115,7 @@ const ResultPortal: React.FC = () => {
           <Card className="w-full max-w-5xl shadow-2xl shadow-blue-200">
             <CardHeader>
               <CardTitle className="text-center lg:text-3xl text-2xl font-semibold mt-2">
-                1st Year 2nd Semester Final Result
+                Semester Final Result
               </CardTitle>
             </CardHeader>
             <div>
